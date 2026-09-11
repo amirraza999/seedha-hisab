@@ -32,7 +32,7 @@ function Result({ title, primary, rows, formula, note }: { title: string; primar
 
 export function CalculatorClient({ slug }: { slug: ToolSlug }) {
   const [v, setV] = useState<Record<string,string>>({
-    salary: "200000", annual: "2400000", income: "2400000", property: "10000000", productCost: "1200", sellingPrice: "2500", orders: "100", deliveryRate: "70", courier: "220", returnCourier: "180", packaging: "70", codFee: "1", adSpend: "50000", overhead: "15000", cost: "1000", selling: "1500", desiredMargin: "30", land: "5", marlaStandard: "225", units: "250", unitRate: "34.47", fixed: "0", fca: "0", tax: "18", cash: "300000", bank: "600000", gold: "500000", silver: "0", investments: "200000", inventory: "0", receivables: "0", liabilities: "100000", nisab: "250000", deductions: "10000", price: "45000", discount1: "25", discount2: "0"
+    salary: "200000", annual: "2400000", income: "2400000", property: "10000000", productCost: "1200", sellingPrice: "2500", orders: "100", deliveryRate: "70", courier: "220", returnCourier: "180", packaging: "70", codFee: "1", adSpend: "15000", overhead: "8000", cost: "1000", selling: "1500", desiredMargin: "30", land: "5", marlaStandard: "225", units: "250", unitRate: "34.47", fixed: "0", fca: "0", tax: "18", cash: "300000", bank: "600000", gold: "500000", silver: "0", investments: "200000", inventory: "0", receivables: "0", liabilities: "100000", nisab: "250000", deductions: "10000", price: "45000", discount1: "25", discount2: "0"
   });
   const [mode, setMode] = useState<Record<string,string>>({ incomePeriod: "monthly", pseB: "yes", atl: "yes", transaction: "purchase", landUnit: "marla" });
   const set = (key: string) => (value: string) => setV(s => ({...s, [key]: value}));
