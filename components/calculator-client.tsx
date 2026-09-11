@@ -18,15 +18,24 @@ function SelectField({ label, value, onChange, children }: { label: string; valu
   return <label className="grid gap-2 text-sm font-bold text-slate-700"><span>{label}</span><select value={value} onChange={e => onChange(e.target.value)} className="h-12 rounded-xl border border-slate-300 bg-white px-3 text-base font-semibold outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100">{children}</select></label>;
 }
 
+function WhatsAppIcon({ size = 16 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.52 0-10 4.48-10 10 0 1.77.46 3.44 1.27 4.89L2 22l5.25-1.28A9.96 9.96 0 0 0 12.04 22c5.52 0 10-4.48 10-10s-4.48-10-10-10Zm0 18.13c-1.6 0-3.15-.43-4.5-1.24l-.32-.19-3.12.76.83-3.05-.21-.32a8.13 8.13 0 0 1-1.25-4.35c0-4.5 3.66-8.16 8.17-8.16 4.5 0 8.16 3.66 8.16 8.16 0 4.51-3.66 8.16-8.16 8.16Zm4.47-6.12c-.24-.12-1.44-.71-1.66-.79-.22-.08-.39-.12-.55.12-.16.24-.63.79-.78.95-.14.16-.29.18-.53.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.11-.11.24-.29.36-.43.12-.14.16-.24.24-.4.08-.16.04-.31-.02-.43-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.42-.55-.42-.14-.01-.31-.01-.47-.01-.16 0-.43.06-.65.31-.22.24-.86.84-.86 2.05s.88 2.38 1 2.54c.12.16 1.73 2.64 4.19 3.7.59.25 1.05.4 1.4.52.59.19 1.13.16 1.55.1.47-.07 1.44-.59 1.65-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z"/></svg>;
+}
+
 function Result({ title, primary, rows, formula, note }: { title: string; primary: string; rows: [string, string][]; formula?: string; note?: string }) {
   const shareText = `${title}: ${primary}\n${rows.map(([a,b]) => `${a}: ${b}`).join("\n")}\nCalculated with Seedha Hisab`;
   async function copy() { await navigator.clipboard?.writeText(shareText); }
   async function share() { if (navigator.share) await navigator.share({ title, text: shareText }); else await copy(); }
+  function whatsapp() { window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank", "noopener,noreferrer"); }
   return <section aria-live="polite" className="overflow-hidden rounded-2xl bg-[#102a43] text-white shadow-[0_18px_50px_rgba(15,42,67,.18)]">
     <div className="border-b border-white/10 p-6"><p className="text-xs font-extrabold uppercase tracking-[.16em] text-emerald-300">{title}</p><p className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">{primary}</p>{note && <p className="mt-3 text-sm leading-6 text-slate-300">{note}</p>}</div>
     <dl className="grid gap-px bg-white/10 sm:grid-cols-2">{rows.map(([label,value]) => <div key={label} className="bg-[#102a43] p-4"><dt className="text-xs font-semibold text-slate-400">{label}</dt><dd className="mt-1 text-base font-bold">{value}</dd></div>)}</dl>
     {formula && <div className="border-t border-white/10 px-6 py-4 text-sm text-slate-300"><strong className="text-white">Formula: </strong>{formula}</div>}
-    <div className="flex gap-2 border-t border-white/10 p-4"><Button onClick={copy} variant="secondary" className="rounded-xl"><Copy size={16} /> Copy result</Button><Button onClick={share} className="rounded-xl bg-emerald-500 text-[#06251c] hover:bg-emerald-400"><Share2 size={16} /> Share</Button></div>
+    <div className="flex flex-wrap gap-2 border-t border-white/10 p-4">
+      <Button onClick={copy} variant="secondary" className="rounded-xl"><Copy size={16} /> Copy result</Button>
+      <Button onClick={whatsapp} className="rounded-xl bg-[#25D366] text-[#06251c] hover:bg-[#1fbd5a]"><WhatsAppIcon /> WhatsApp</Button>
+      <Button onClick={share} className="rounded-xl bg-emerald-500 text-[#06251c] hover:bg-emerald-400"><Share2 size={16} /> Share</Button>
+    </div>
   </section>;
 }
 

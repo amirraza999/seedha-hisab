@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Inter, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
 import { coreKeywords, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 const gaId = process.env.NEXT_PUBLIC_GA_ID;
 const gscVerification = process.env.NEXT_PUBLIC_GSC_VERIFICATION;
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+const notoNastaliqUrdu = Noto_Nastaliq_Urdu({
+  subsets: ["arabic"],
+  weight: ["400", "700"],
+  variable: "--font-urdu",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -59,6 +72,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
   },
   manifest: "/manifest.webmanifest",
   ...(gscVerification
@@ -72,7 +86,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-PK">
+    <html lang="en-PK" className={`${inter.variable} ${notoNastaliqUrdu.variable}`}>
       <body className="antialiased">
         {children}
         {gaId && (
