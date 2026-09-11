@@ -22,7 +22,7 @@ export const coreKeywords = [
 
 export const toolSeo: Record<ToolSlug, SeoCluster> = {
   "salary-tax-calculator-pakistan": {
-    title: "Salary Tax Calculator Pakistan 2026-27 | FBR Slabs",
+    title: "Salary Tax Calculator Pakistan 2026-27",
     description:
       "Calculate monthly and annual salary tax in Pakistan for tax year 2026-27 using enacted FBR slabs, with the formula and assumptions shown.",
     keywords: [
@@ -130,7 +130,7 @@ export const toolSeo: Record<ToolSlug, SeoCluster> = {
     ],
   },
   "discount-calculator": {
-    title: "Discount Calculator Pakistan | Final Price & Savings",
+    title: "Discount Calculator Pakistan",
     description:
       "Calculate the discount amount, final price and combined effect of two sequential discounts with a clear percentage breakdown.",
     keywords: [
