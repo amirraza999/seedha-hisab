@@ -1,0 +1,26 @@
+# Seedha Hisab
+
+Seedha Hisab is an independent Pakistan calculator website. It publishes free, browser-based calculators with visible formulas, assumptions, applicable periods and source references.
+
+## Primary sections
+
+- /tools — all calculators
+- /guides — source-aware calculation guides
+- /methodology — calculation and verification methodology
+- /sources — source policy and official references
+- /editorial-policy — editorial standards
+- /corrections-policy — how calculation corrections are handled
+
+## Calculator topics
+
+- Salary and income tax in Pakistan
+- Freelancer and service-export withholding
+- Filer vs non-filer property withholding
+- COD e-commerce profit and RTO costs
+- Profit margin and markup
+- Marla, kanal, square feet and gaz conversion
+- Electricity bill estimation
+- Zakat estimation
+- Net salary and discount calculations
+
+Important: results are educational estimates, not official assessments or personalised tax, legal or religious advice. Time-sensitive figures should be checked against the source and verification date displayed on each page.

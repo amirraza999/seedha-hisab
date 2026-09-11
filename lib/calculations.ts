@@ -1,0 +1,103 @@
+export type SalaryTaxResult = { annualIncome: number; annualTax: number; monthlyTax: number; annualTakeHome: number; monthlyTakeHome: number; effectiveRate: number; marginalRate: number; bracket: string };
+
+export const salaryTax2026 = {
+  taxYear: "2026–27",
+  effectiveFrom: "2026-07-01",
+  effectiveTo: "2027-06-30",
+  lastVerified: "2026-09-10",
+  source: "Finance Act 2026, First Schedule, Part I, Division I, clause (2)",
+  sourceUrl: "https://download1.fbr.gov.pk/Docs/20266291261044366FinanceAct2026.pdf",
+  brackets: [
+    { max: 600_000, base: 0, floor: 0, rate: 0 },
+    { max: 1_200_000, base: 0, floor: 600_000, rate: 0.01 },
+    { max: 2_200_000, base: 6_000, floor: 1_200_000, rate: 0.11 },
+    { max: 3_200_000, base: 116_000, floor: 2_200_000, rate: 0.20 },
+    { max: 4_100_000, base: 316_000, floor: 3_200_000, rate: 0.25 },
+    { max: 5_600_000, base: 541_000, floor: 4_100_000, rate: 0.29 },
+    { max: 7_000_000, base: 976_000, floor: 5_600_000, rate: 0.32 },
+    { max: Infinity, base: 1_424_000, floor: 7_000_000, rate: 0.35 },
+  ],
+} as const;
+
+const percent = (value: number) => Math.min(100, Math.max(0, Number.isFinite(value) ? value : 0));
+
+export function salaryTax(annualIncome: number): SalaryTaxResult {
+  const income = Math.max(0, annualIncome || 0);
+  const bracket = salaryTax2026.brackets.find((item) => income <= item.max) ?? salaryTax2026.brackets.at(-1)!;
+  const annualTax = Math.max(0, bracket.base + Math.max(0, income - bracket.floor) * bracket.rate);
+  return {
+    annualIncome: income,
+    annualTax,
+    monthlyTax: annualTax / 12,
+    annualTakeHome: income - annualTax,
+    monthlyTakeHome: (income - annualTax) / 12,
+    effectiveRate: income ? (annualTax / income) * 100 : 0,
+    marginalRate: bracket.rate * 100,
+    bracket: bracket.max === Infinity ? `Above Rs ${bracket.floor.toLocaleString("en-PK")}` : `Rs ${bracket.floor.toLocaleString("en-PK")} – ${bracket.max.toLocaleString("en-PK")}`,
+  };
+}
+
+export function freelancerTax(income: number, pseB: boolean, atl: boolean) {
+  const baseRate = pseB ? 0.0025 : 0.01;
+  const rate = atl ? baseRate : baseRate * 2;
+  const tax = Math.max(0, income) * rate;
+  return { tax, net: Math.max(0, income) - tax, rate: rate * 100 };
+}
+
+export function propertyWithholding(value: number, transaction: "purchase" | "sale") {
+  const filerRate = transaction === "purchase" ? 0.0125 : 0.0275;
+  const filer = Math.max(0, value) * filerRate;
+  const nonFiler = filer * 2;
+  return { filer, nonFiler, difference: nonFiler - filer, filerRate: filerRate * 100, nonFilerRate: filerRate * 200 };
+}
+
+export function codProfit(input: { productCost: number; sellingPrice: number; orders: number; deliveryRate: number; courier: number; returnCourier: number; packaging: number; codFee: number; adSpend: number; overhead: number }) {
+  const orders = Math.max(0, input.orders);
+  const delivered = orders * (percent(input.deliveryRate) / 100);
+  const returned = orders - delivered;
+  const sales = delivered * input.sellingPrice;
+  const product = delivered * input.productCost;
+  const courier = delivered * input.courier;
+  const rto = returned * input.returnCourier;
+  const packaging = orders * Math.max(0, input.packaging);
+  const cod = sales * (percent(input.codFee) / 100);
+  const totalCost = product + courier + rto + packaging + cod + input.adSpend + input.overhead;
+  const profit = sales - totalCost;
+  const cpa = delivered ? input.adSpend / delivered : 0;
+  const profitBeforeAds = profit + input.adSpend;
+  return { delivered, returned, sales, totalCost, profit, margin: sales ? (profit / sales) * 100 : 0, profitPerDelivered: delivered ? profit / delivered : 0, roas: input.adSpend ? sales / input.adSpend : 0, cpa, breakEvenCpa: delivered ? profitBeforeAds / delivered : 0, breakEvenRoas: profitBeforeAds > 0 ? sales / profitBeforeAds : 0 };
+}
+
+export function marginCalc(cost: number, selling: number) {
+  const profit = selling - cost;
+  return { profit, margin: selling ? (profit / selling) * 100 : 0, markup: cost ? (profit / cost) * 100 : 0 };
+}
+
+export function requiredForMargin(cost: number, desiredMargin: number) {
+  return desiredMargin >= 100 ? 0 : cost / (1 - desiredMargin / 100);
+}
+
+export function landConvert(value: number, unit: string, marlaSqFt: number) {
+  const sqFt = unit === "marla" ? value * marlaSqFt : unit === "kanal" ? value * marlaSqFt * 20 : unit === "sqyd" ? value * 9 : unit === "sqm" ? value * 10.7639104167 : value;
+  return { sqFt, marla: sqFt / marlaSqFt, kanal: sqFt / (marlaSqFt * 20), sqyd: sqFt / 9, sqm: sqFt / 10.7639104167, acres: sqFt / 43560 };
+}
+
+export function electricityEstimate(units: number, rate: number, fixed: number, fca: number, taxPercent: number) {
+  const energy = Math.max(0, units) * Math.max(0, rate);
+  const subtotal = energy + Math.max(0, fixed) + Math.max(0, fca);
+  const taxes = subtotal * percent(taxPercent) / 100;
+  return { energy, subtotal, taxes, total: subtotal + taxes };
+}
+
+export function zakatCalc(assets: number[], liabilities: number, nisab: number) {
+  const totalAssets = assets.reduce((sum, value) => sum + Math.max(0, value || 0), 0);
+  const netAssets = Math.max(0, totalAssets - Math.max(0, liabilities));
+  return { totalAssets, netAssets, eligible: netAssets >= nisab, zakat: netAssets >= nisab ? netAssets * 0.025 : 0 };
+}
+
+export function discountCalc(price: number, first: number, second = 0) {
+  const safePrice = Math.max(0, price);
+  const afterFirst = safePrice * (1 - percent(first) / 100);
+  const finalPrice = afterFirst * (1 - percent(second) / 100);
+  return { discount: safePrice - finalPrice, finalPrice, effectiveDiscount: safePrice ? ((safePrice - finalPrice) / safePrice) * 100 : 0 };
+}

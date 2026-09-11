@@ -1,0 +1,59 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../vendor/shadcn-tailwind-4.13.0.css";
+
+@utility scrollbar-thin { scrollbar-width: thin; }
+@utility scrollbar-none { scrollbar-width: none; &::-webkit-scrollbar { display:none; } }
+
+:root {
+  --background:#ffffff; --foreground:#17212b;
+  --card:#ffffff; --card-foreground:#17212b;
+  --popover:#ffffff; --popover-foreground:#17212b;
+  --primary:#102a43; --primary-foreground:#ffffff;
+  --secondary:#edf7f3; --secondary-foreground:#075d46;
+  --muted:#f1f5f9; --muted-foreground:#64748b;
+  --accent:#edf7f3; --accent-foreground:#075d46;
+  --destructive:#c53030; --border:#e2e8f0; --input:#cbd5e1; --ring:#087f5b;
+  --chart-1:#087f5b; --chart-2:#102a43; --chart-3:#d97706; --chart-4:#2563eb; --chart-5:#7c3aed;
+  --radius:.75rem;
+  --sidebar:#f8fafc; --sidebar-foreground:#17212b; --sidebar-primary:#102a43;
+  --sidebar-primary-foreground:#fff; --sidebar-accent:#edf7f3; --sidebar-accent-foreground:#075d46;
+  --sidebar-border:#e2e8f0; --sidebar-ring:#087f5b;
+}
+
+@theme inline {
+  --color-background:var(--background); --color-foreground:var(--foreground);
+  --color-card:var(--card); --color-card-foreground:var(--card-foreground);
+  --color-popover:var(--popover); --color-popover-foreground:var(--popover-foreground);
+  --color-primary:var(--primary); --color-primary-foreground:var(--primary-foreground);
+  --color-secondary:var(--secondary); --color-secondary-foreground:var(--secondary-foreground);
+  --color-muted:var(--muted); --color-muted-foreground:var(--muted-foreground);
+  --color-accent:var(--accent); --color-accent-foreground:var(--accent-foreground);
+  --color-destructive:var(--destructive); --color-border:var(--border); --color-input:var(--input); --color-ring:var(--ring);
+  --color-chart-1:var(--chart-1); --color-chart-2:var(--chart-2); --color-chart-3:var(--chart-3); --color-chart-4:var(--chart-4); --color-chart-5:var(--chart-5);
+  --color-sidebar:var(--sidebar); --color-sidebar-foreground:var(--sidebar-foreground); --color-sidebar-primary:var(--sidebar-primary);
+  --color-sidebar-primary-foreground:var(--sidebar-primary-foreground); --color-sidebar-accent:var(--sidebar-accent);
+  --color-sidebar-accent-foreground:var(--sidebar-accent-foreground); --color-sidebar-border:var(--sidebar-border); --color-sidebar-ring:var(--sidebar-ring);
+  --radius-sm:calc(var(--radius) - 4px); --radius-md:calc(var(--radius) - 2px); --radius-lg:var(--radius); --radius-xl:calc(var(--radius) + 4px);
+  --font-sans:"Inter","Noto Sans Arabic",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+* { border-color:var(--border); }
+html { scroll-behavior:smooth; }
+body { min-width:320px; background:#fff; color:var(--foreground); font-family:var(--font-sans); }
+::selection { background:#b7f0dc; color:#102a43; }
+button,a,input,select { -webkit-tap-highlight-color:transparent; }
+.eyebrow { color:#087f5b; font-size:.75rem; line-height:1rem; font-weight:800; text-transform:uppercase; letter-spacing:.14em; }
+.section-title { margin-top:.5rem; max-width:46rem; color:#102a43; font-size:clamp(1.8rem,4vw,2.7rem); line-height:1.08; font-weight:900; letter-spacing:-.035em; }
+.info-card { border:1px solid #e2e8f0; border-radius:1rem; padding:1.5rem; background:#fff; }
+.info-card h2 { color:#102a43; font-size:1.05rem; font-weight:850; }
+.info-card p,.info-card li { margin-top:.7rem; color:#526171; font-size:.9rem; line-height:1.65; }
+.info-card ul { padding-left:1.1rem; list-style:disc; }
+.font-urdu { font-family:"Noto Nastaliq Urdu","Noto Sans Arabic","Segoe UI",sans-serif; }
+.guide-prose section + section { margin-top:3rem; }
+.guide-prose h2 { color:#102a43; font-size:clamp(1.65rem,3vw,2.1rem); line-height:1.15; font-weight:900; letter-spacing:-.025em; }
+.guide-prose p { margin-top:1rem; color:#526171; font-size:1rem; line-height:1.85; }
+.guide-prose ul { margin-top:1rem; padding-left:1.25rem; list-style:disc; color:#526171; }
+.guide-prose li { margin-top:.6rem; line-height:1.75; }
+.formula-box { margin-top:1.25rem; overflow-x:auto; border-left:4px solid #087f5b; border-radius:.75rem; background:#edf7f3; padding:1rem 1.25rem; color:#102a43; font-size:.95rem; line-height:1.7; font-weight:800; }
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
