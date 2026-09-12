@@ -4,7 +4,8 @@ import { Children, useState } from "react";
 import { Copy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { codProfit, discountCalc, electricityEstimate, freelancerTax, landConvert, marginCalc, propertyWithholding, requiredForMargin, salaryTax } from "@/lib/calculations";
+import { codProfit, discountCalc, electricityEstimate, electricitySlabEstimate, freelancerTax, landConvert, marginCalc, propertyWithholding, requiredForMargin, salaryTax } from "@/lib/calculations";
+import { discoTariffs, getDiscoTariff, tariffDataNote, type ConsumerCategory } from "@/lib/electricity-tariffs";
 import type { ToolSlug } from "@/lib/tools";
 
 const money = (n: number) => `Rs ${Math.round(Number.isFinite(n) ? n : 0).toLocaleString("en-PK")}`;
@@ -43,7 +44,7 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
   const [v, setV] = useState<Record<string,string>>({
     salary: "200000", annual: "2400000", income: "2400000", property: "10000000", productCost: "1200", sellingPrice: "2500", orders: "100", deliveryRate: "70", courier: "220", returnCourier: "180", packaging: "70", codFee: "1", adSpend: "15000", overhead: "8000", cost: "1000", selling: "1500", desiredMargin: "30", land: "5", marlaStandard: "225", units: "250", unitRate: "34.47", fixed: "0", fca: "0", tax: "18", cash: "300000", bank: "600000", gold: "500000", silver: "0", investments: "200000", inventory: "0", receivables: "0", liabilities: "100000", nisab: "250000", deductions: "10000", price: "45000", discount1: "25", discount2: "0"
   });
-  const [mode, setMode] = useState<Record<string,string>>({ incomePeriod: "monthly", pseB: "yes", atl: "yes", transaction: "purchase", landUnit: "marla" });
+  const [mode, setMode] = useState<Record<string,string>>({ incomePeriod: "monthly", pseB: "yes", atl: "yes", transaction: "purchase", landUnit: "marla", electricityMode: "manual", disco: "lesco", consumerCategory: "protected" });
   const set = (key: string) => (value: string) => setV(s => ({...s, [key]: value}));
 
   if (slug === "salary-tax-calculator-pakistan" || slug === "net-salary-calculator-pakistan") {
@@ -79,8 +80,22 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
   }
 
   if (slug === "electricity-bill-calculator-pakistan") {
+    if (mode.electricityMode === "disco") {
+      const disco = getDiscoTariff(mode.disco) ?? discoTariffs[0];
+      const category = disco.categories[mode.consumerCategory as ConsumerCategory] ?? disco.categories.protected;
+      const r = electricitySlabEstimate(num(v.units), category.slabs, category.fixedCharge, num(v.tax));
+      return <CalcShell>
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">⚠️ Draft feature — {tariffDataNote}</div>
+        <SelectField label="Distribution company (DISCO)" value={mode.disco} onChange={x=>setMode(s=>({...s,disco:x}))}>{discoTariffs.map(d=><option key={d.slug} value={d.slug}>{d.name}</option>)}</SelectField>
+        <SelectField label="Consumer category" value={mode.consumerCategory} onChange={x=>setMode(s=>({...s,consumerCategory:x}))}><option value="lifeline">{disco.categories.lifeline.label}</option><option value="protected">{disco.categories.protected.label}</option><option value="unprotected">{disco.categories.unprotected.label}</option></SelectField>
+        <Field label="Units consumed" value={v.units} onChange={set("units")} suffix="kWh"/>
+        <Field label="Combined tax estimate" value={v.tax} onChange={set("tax")} suffix="%"/>
+        <Result title="Estimated electricity bill (draft)" primary={money(r.total)} rows={[["Energy charges",money(r.energy)],["Fixed charge",money(r.fixedCharge)],["Modeled taxes",money(r.taxes)],["Slabs applied",`${r.breakdown.length}`]]} formula="Sum of (units in each slab × slab rate) + fixed charge, then taxes" note="Draft DISCO rates — not yet verified. Switch to Manual Rate mode for a trustworthy estimate today." /></CalcShell>;
+    }
     const r = electricityEstimate(num(v.units),num(v.unitRate),num(v.fixed),num(v.fca),num(v.tax));
-    return <CalcShell><div className="grid gap-4 sm:grid-cols-2"><Field label="Units consumed" value={v.units} onChange={set("units")} suffix="kWh"/><Field label="Applicable average tariff" value={v.unitRate} onChange={set("unitRate")} suffix="Rs/unit" hint="Enter the rate shown for your category; tariffs change."/><Field label="Fixed charges" value={v.fixed} onChange={set("fixed")} suffix="PKR"/><Field label="FCA / other adjustments" value={v.fca} onChange={set("fca")} suffix="PKR"/><Field label="Combined tax estimate" value={v.tax} onChange={set("tax")} suffix="%"/></div><Result title="Estimated electricity bill" primary={money(r.total)} rows={[["Energy charges",money(r.energy)],["Before tax",money(r.subtotal)],["Modeled taxes",money(r.taxes)],["Actual bill may differ","Arrears, meter factors & monthly adjustments"]]} formula="(Units × chosen tariff + fixed charges + adjustments) × taxes" note="Transparent manual-rate estimator. It does not claim a single nationwide tariff." /></CalcShell>;
+    return <CalcShell>
+      <SelectField label="Rate mode" value={mode.electricityMode} onChange={x=>setMode(s=>({...s,electricityMode:x}))}><option value="manual">Manual rate (recommended — accurate today)</option><option value="disco">By DISCO (draft — pending verification)</option></SelectField>
+      <div className="grid gap-4 sm:grid-cols-2"><Field label="Units consumed" value={v.units} onChange={set("units")} suffix="kWh"/><Field label="Applicable average tariff" value={v.unitRate} onChange={set("unitRate")} suffix="Rs/unit" hint="Enter the rate shown for your category; tariffs change."/><Field label="Fixed charges" value={v.fixed} onChange={set("fixed")} suffix="PKR"/><Field label="FCA / other adjustments" value={v.fca} onChange={set("fca")} suffix="PKR"/><Field label="Combined tax estimate" value={v.tax} onChange={set("tax")} suffix="%"/></div><Result title="Estimated electricity bill" primary={money(r.total)} rows={[["Energy charges",money(r.energy)],["Before tax",money(r.subtotal)],["Modeled taxes",money(r.taxes)],["Actual bill may differ","Arrears, meter factors & monthly adjustments"]]} formula="(Units × chosen tariff + fixed charges + adjustments) × taxes" note="Transparent manual-rate estimator. It does not claim a single nationwide tariff." /></CalcShell>;
   }
 
   if (slug === "zakat-calculator-pakistan") {

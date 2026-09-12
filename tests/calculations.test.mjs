@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   codProfit,
   discountCalc,
+  electricitySlabEstimate,
   freelancerTax,
   landConvert,
   marginCalc,
@@ -44,6 +45,29 @@ test("common arithmetic calculators match worked examples", () => {
   assert.equal(margin.markup, 50);
   assert.deepEqual(discountCalc(45_000, 25), { discount: 11_250, finalPrice: 33_750, effectiveDiscount: 25 });
   assert.equal(landConvert(5, "marla", 225).sqFt, 1_125);
+});
+
+test("electricity slab estimate splits units across slabs correctly", () => {
+  const slabs = [
+    { upTo: 300, ratePerUnit: 20 },
+    { upTo: 500, ratePerUnit: 28 },
+    { upTo: Infinity, ratePerUnit: 42 },
+  ];
+  const within = electricitySlabEstimate(250, slabs, 500, 0);
+  assert.equal(within.energy, 5_000);
+  assert.equal(within.total, 5_500);
+  const spanning = electricitySlabEstimate(400, slabs, 500, 0);
+  assert.equal(spanning.energy, 300 * 20 + 100 * 28);
+  assert.equal(spanning.breakdown.length, 2);
+});
+
+test("electricity slab estimate never drops units beyond the last defined slab", () => {
+  const cappedSlabs = [
+    { upTo: 100, ratePerUnit: 10 },
+    { upTo: 200, ratePerUnit: 13 },
+  ];
+  const r = electricitySlabEstimate(250, cappedSlabs, 0, 0);
+  assert.equal(r.energy, 100 * 10 + 100 * 13 + 50 * 13);
 });
 
 test("COD model accounts for delivered and returned orders", () => {

@@ -89,6 +89,36 @@ export function electricityEstimate(units: number, rate: number, fixed: number, 
   return { energy, subtotal, taxes, total: subtotal + taxes };
 }
 
+export function electricitySlabEstimate(units: number, slabs: { upTo: number; ratePerUnit: number }[], fixedCharge: number, taxPercent: number) {
+  const safeUnits = Math.max(0, units);
+  let remaining = safeUnits;
+  let floor = 0;
+  let energy = 0;
+  const breakdown: { from: number; to: number; units: number; rate: number; amount: number }[] = [];
+  for (const slab of slabs) {
+    if (remaining <= 0) break;
+    const slabWidth = slab.upTo - floor;
+    const unitsInSlab = Math.min(remaining, slabWidth);
+    if (unitsInSlab > 0) {
+      const amount = unitsInSlab * slab.ratePerUnit;
+      energy += amount;
+      breakdown.push({ from: floor + 1, to: slab.upTo === Infinity ? floor + unitsInSlab : slab.upTo, units: unitsInSlab, rate: slab.ratePerUnit, amount });
+      remaining -= unitsInSlab;
+    }
+    floor = slab.upTo;
+  }
+  if (remaining > 0 && slabs.length > 0) {
+    const lastSlab = slabs[slabs.length - 1];
+    const amount = remaining * lastSlab.ratePerUnit;
+    energy += amount;
+    breakdown.push({ from: floor + 1, to: floor + remaining, units: remaining, rate: lastSlab.ratePerUnit, amount });
+    remaining = 0;
+  }
+  const subtotal = energy + Math.max(0, fixedCharge);
+  const taxes = subtotal * percent(taxPercent) / 100;
+  return { energy, fixedCharge: Math.max(0, fixedCharge), subtotal, taxes, total: subtotal + taxes, breakdown };
+}
+
 export function zakatCalc(assets: number[], liabilities: number, nisab: number) {
   const totalAssets = assets.reduce((sum, value) => sum + Math.max(0, value || 0), 0);
   const netAssets = Math.max(0, totalAssets - Math.max(0, liabilities));
