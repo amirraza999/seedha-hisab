@@ -5,7 +5,7 @@ import { Copy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { codProfit, darazFbdProfit, darazFbmProfit, discountCalc, electricityEstimate, electricitySlabEstimate, freelancerTax, isBulkyItem, landConvert, marginCalc, propertyWithholding, requiredForMargin, salaryTax } from "@/lib/calculations";
-import { darazCategories, darazProvinces, DARAZ_PAYMENT_FEE_PCT } from "@/lib/daraz-fees";
+import { darazCategories, darazProvinces, DARAZ_PAYMENT_FEE_PCT, getDarazCategoryCommission } from "@/lib/daraz-fees";
 import { discoTariffs, getDiscoTariff, tariffDataNote, type ConsumerCategory } from "@/lib/electricity-tariffs";
 import type { ToolSlug } from "@/lib/tools";
 
@@ -49,7 +49,7 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
   const [v, setV] = useState<Record<string,string>>({
     salary: "200000", annual: "2400000", income: "2400000", property: "10000000", productCost: "1200", sellingPrice: "2500", orders: "100", deliveryRate: "70", courier: "220", returnCourier: "180", packaging: "70", codFee: "1", adSpend: "15000", overhead: "8000", cost: "1000", selling: "1500", desiredMargin: "30", land: "5", marlaStandard: "225", units: "250", unitRate: "34.47", fixed: "0", fca: "0", tax: "18", cash: "300000", bank: "600000", gold: "500000", silver: "0", investments: "200000", inventory: "0", receivables: "0", liabilities: "100000", nisab: "250000", deductions: "10000", price: "45000", discount1: "25", discount2: "0", darazSp: "2000", darazPurchase: "900", darazExtra: "0", darazPenalties: "0", darazVoucherPct: "3", darazWeight: "500", darazPickPack: "60", darazStorage: "0"
   });
-  const [mode, setMode] = useState<Record<string,string>>({ incomePeriod: "monthly", pseB: "yes", atl: "yes", transaction: "purchase", landUnit: "marla", electricityMode: "manual", disco: "lesco", consumerCategory: "protected", darazCategory: "18", darazProvince: "15", darazVoucherOn: "no", darazFsmOn: "no", darazHandlingMode: "dropoff", darazDeliveryType: "door", darazZone: "1" });
+  const [mode, setMode] = useState<Record<string,string>>({ incomePeriod: "monthly", pseB: "yes", atl: "yes", transaction: "purchase", landUnit: "marla", electricityMode: "manual", disco: "lesco", consumerCategory: "protected", darazCategory: "fashion", darazProvince: "15", darazVoucherOn: "no", darazFsmOn: "no", darazHandlingMode: "dropoff", darazDeliveryType: "door", darazZone: "1" });
   const [darazTab, setDarazTab] = useState<"fbm" | "fbd">("fbm");
   const [darazCalculated, setDarazCalculated] = useState(false);
   const set = (key: string) => (value: string) => setV(s => ({...s, [key]: value}));
@@ -81,7 +81,7 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
     const setDMode = (key: string) => (value: string) => { setDarazCalculated(false); setMode(s => ({...s, [key]: value})); };
     const shared = {
       sellingPrice: num(v.darazSp), purchasePrice: num(v.darazPurchase), extraCharges: num(v.darazExtra), penalties: num(v.darazPenalties),
-      commissionPercent: num(mode.darazCategory), paymentFeePercent: DARAZ_PAYMENT_FEE_PCT, vatPercent: num(mode.darazProvince),
+      commissionPercent: getDarazCategoryCommission(mode.darazCategory), paymentFeePercent: DARAZ_PAYMENT_FEE_PCT, vatPercent: num(mode.darazProvince),
       voucherOn: mode.darazVoucherOn === "yes", voucherPercent: num(v.darazVoucherPct), freeShippingMaxOn: mode.darazFsmOn === "yes",
     };
     const fbm = darazFbmProfit({ ...shared, weightGrams: num(v.darazWeight), pickup: mode.darazHandlingMode === "pickup", deliveryType: mode.darazDeliveryType as "door" | "collection", zone: Number(mode.darazZone) as 1|2|3|4, pickPackFee: 0, storageFee: 0 });
@@ -103,14 +103,14 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
         <div className={`min-w-0 rounded-2xl border p-5 transition ${darazTab === "fbm" ? "border-[#102a43] bg-white shadow-md" : "border-slate-200 bg-slate-50/70 opacity-60"}`}>
           <p className="text-xs font-extrabold uppercase tracking-[.12em] text-[#102a43]">FBM · Fulfilled by Merchant</p>
           <div className="mt-4 grid gap-3">
-            <SelectField label="Category" value={mode.darazCategory} onChange={setDMode("darazCategory")}>{darazCategories.map(c=><option key={c.value} value={c.value}>{c.label}</option>)}</SelectField>
+            <SelectField label="Category" value={mode.darazCategory} onChange={setDMode("darazCategory")}>{darazCategories.map(c=><option key={c.slug} value={c.slug}>{c.label}</option>)}</SelectField>
             <Field label="Payment fee" value={String(DARAZ_PAYMENT_FEE_PCT)} onChange={() => {}} suffix="%" hint="Fixed by Daraz on every delivered order." />
           </div>
         </div>
         <div className={`min-w-0 rounded-2xl border p-5 transition ${darazTab === "fbd" ? "border-[#102a43] bg-white shadow-md" : "border-slate-200 bg-slate-50/70 opacity-60"}`}>
           <p className="text-xs font-extrabold uppercase tracking-[.12em] text-[#102a43]">FBD · Fulfilled by Daraz</p>
           <div className="mt-4 grid gap-3">
-            <SelectField label="Category" value={mode.darazCategory} onChange={setDMode("darazCategory")}>{darazCategories.map(c=><option key={c.value} value={c.value}>{c.label}</option>)}</SelectField>
+            <SelectField label="Category" value={mode.darazCategory} onChange={setDMode("darazCategory")}>{darazCategories.map(c=><option key={c.slug} value={c.slug}>{c.label}</option>)}</SelectField>
             <Field label="Payment fee" value={String(DARAZ_PAYMENT_FEE_PCT)} onChange={() => {}} suffix="%" hint="Same category and payment fee apply to both models for the same product." />
           </div>
         </div>
