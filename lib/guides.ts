@@ -130,6 +130,25 @@ export const guides: Guide[] = [
     table:{title:"Rs 45,000 at 25% off",caption:"A transparent breakdown of the example.",columns:["Step","Calculation","Result"],rows:[["Discount amount","Rs 45,000 × 0.25","Rs 11,250"],["Final price","Rs 45,000 − Rs 11,250","Rs 33,750"],["Amount paid","Rs 45,000 × 0.75","Rs 33,750"]]},
     faqs:[{question:"Can I add two discount percentages?",answer:"Not when the second is applied after the first. Multiply the remaining-price factors to find the effective combined discount."}],sources:[{organization:"Seedha Hisab",title:"Standard percentage arithmetic",note:"The linked tool supports one or two sequential discounts."}],
   },
+  {
+    slug:"net-salary-vs-gross-salary-pakistan",category:"Tax & Salary",featured:false,
+    title:"Net Salary vs Gross Salary in Pakistan",description:"Understand the difference between gross and net (take-home) salary in Pakistan, with a worked 2026–27 example and the deductions that commonly apply.",
+    directAnswer:"Gross salary is the full amount stated in an offer letter or contract before any deduction. Net salary — also called take-home pay — is what actually reaches the bank account after income tax and any other agreed deductions such as provident fund are subtracted.",
+    period:"Tax Year 2026–27",verified:"18 September 2026",freshness:"Review required",calculatorSlug:"net-salary-calculator-pakistan",calculatorLabel:"Calculate your take-home salary",
+    takeaways:["Gross salary is the contract figure; net salary is what is actually received.","Income tax is calculated on annualised taxable salary, then divided across 12 months.","Provident fund, loan recovery or other agreed deductions reduce net salary further.","A payslip's net figure can differ slightly from a basic calculator due to employer-specific adjustments."],
+    sections:[
+      {heading:"What separates gross from net",paragraphs:["Gross monthly salary is multiplied by 12 to estimate annual taxable salary, which is matched against the 2026–27 slab table to find annual tax. That tax is divided by 12 for a monthly estimate, then subtracted from gross salary along with any other deductions the employee enters."],formula:"Net monthly salary = gross monthly salary − (annual tax ÷ 12) − other monthly deductions"},
+      {heading:"Worked example: Rs 250,000 monthly",paragraphs:["Annual salary is Rs 3,000,000. Using the 2026–27 slabs, annual tax is Rs 116,000 plus 20% of the Rs 800,000 above the Rs 2,200,000 floor, which is Rs 276,000 annual tax, or Rs 23,000 monthly. With no other deductions entered, take-home pay is Rs 250,000 − Rs 23,000 = Rs 227,000 per month."]},
+      {heading:"Why a payslip can differ from the estimate",paragraphs:["Employers may apply provident fund contributions, benevolent fund, EOBI, loan instalments, health-insurance premiums or tax credits that a basic calculator does not know about. Bonuses or arrears paid in a single month can also push that month's withholding higher than a flat monthly estimate suggests."]},
+    ],
+    table:{title:"Gross vs estimated net at three salary levels",caption:"2026–27 slabs, no additional deductions entered.",columns:["Gross monthly salary","Annual salary","Annual tax","Estimated net monthly"],rows:[["Rs 150,000","Rs 1,800,000","Rs 72,000","Rs 144,000"],["Rs 250,000","Rs 3,000,000","Rs 276,000","Rs 227,000"],["Rs 400,000","Rs 4,800,000","Rs 744,000","Rs 338,000"]]},
+    faqs:[
+      {question:"Is net salary the same as take-home pay?",answer:"Yes, the terms are used interchangeably — both mean the amount actually paid out after tax and other deductions."},
+      {question:"Does provident fund reduce taxable salary?",answer:"Treatment depends on the specific fund type and employer scheme; enter any such deduction manually since the base calculator does not assume one."},
+      {question:"Why is my actual payslip different from this estimate?",answer:"Bonuses, arrears, tax credits, loan recoveries and employer-specific benefits can all change the withheld amount in a way a basic slab calculator cannot see."},
+    ],
+    sources:[{organization:"Federal Board of Revenue (FBR)",title:"Finance Act 2026 — First Schedule, Part I, Division I",url:financeAct,note:"Same salary-slab source used by the salary tax calculator."}],
+  },
 ];
 
 export function getGuide(slug: string) { return guides.find((guide) => guide.slug === slug); }
