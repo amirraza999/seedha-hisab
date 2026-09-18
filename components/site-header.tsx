@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Calculator, Search } from "lucide-react";
+import { Calculator } from "lucide-react";
 import { MobileNav } from "@/components/mobile-nav";
+import { SiteSearch } from "@/components/site-search";
 
 export function SiteHeader() {
   return (
@@ -60,13 +61,7 @@ export function SiteHeader() {
           </Link>
         </nav>
         <div className="flex items-center gap-2">
-          <Link
-            href="/#find-tool"
-            className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 text-slate-700 transition hover:border-emerald-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100"
-            aria-label="Search tools"
-          >
-            <Search size={18} />
-          </Link>
+          <SiteSearch />
           <MobileNav />
         </div>
       </div>
