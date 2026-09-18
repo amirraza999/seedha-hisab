@@ -132,12 +132,20 @@ export function discountCalc(price: number, first: number, second = 0) {
   return { discount: safePrice - finalPrice, finalPrice, effectiveDiscount: safePrice ? ((safePrice - finalPrice) / safePrice) * 100 : 0 };
 }
 
+export const BULKY_ITEM_THRESHOLD_GRAMS = 8000;
+const BULKY_ITEM_SURCHARGE = 100;
+
+export function isBulkyItem(weightGrams: number) {
+  return weightGrams >= BULKY_ITEM_THRESHOLD_GRAMS;
+}
+
 export function fbmShippingFee(zone: 1 | 2 | 3 | 4, weightGrams: number, deliveryType: "door" | "collection", override = 0) {
   if (override > 0) return override;
   const bases = { 1: 100, 2: 130, 3: 160, 4: 200 };
   const steps = { 1: 15, 2: 20, 3: 25, 4: 30 };
   let fee = bases[zone] + Math.max(0, Math.ceil((weightGrams - 1000) / 500)) * steps[zone];
   if (deliveryType === "collection") fee *= 0.9;
+  if (isBulkyItem(weightGrams)) fee += BULKY_ITEM_SURCHARGE;
   return fee;
 }
 

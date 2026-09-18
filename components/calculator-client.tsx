@@ -4,7 +4,7 @@ import { Children, useState } from "react";
 import { Copy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { codProfit, darazFbdProfit, darazFbmProfit, discountCalc, electricityEstimate, electricitySlabEstimate, freelancerTax, landConvert, marginCalc, propertyWithholding, requiredForMargin, salaryTax } from "@/lib/calculations";
+import { codProfit, darazFbdProfit, darazFbmProfit, discountCalc, electricityEstimate, electricitySlabEstimate, freelancerTax, isBulkyItem, landConvert, marginCalc, propertyWithholding, requiredForMargin, salaryTax } from "@/lib/calculations";
 import { darazCategories, darazProvinces, DARAZ_PAYMENT_FEE_PCT } from "@/lib/daraz-fees";
 import { discoTariffs, getDiscoTariff, tariffDataNote, type ConsumerCategory } from "@/lib/electricity-tariffs";
 import type { ToolSlug } from "@/lib/tools";
@@ -105,7 +105,7 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
         <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5">
           <p className="text-xs font-extrabold uppercase tracking-[.12em] text-slate-500">FBM · Fulfilled by Merchant</p>
           <div className="mt-4 grid gap-3">
-            <Field label="Weight" value={v.darazWeight} onChange={set("darazWeight")} suffix="grams" />
+            <Field label="Weight" value={v.darazWeight} onChange={set("darazWeight")} suffix="grams" hint={isBulkyItem(num(v.darazWeight)) ? "Bulky item (8kg+) — a shipping surcharge is applied." : undefined} />
             <SelectField label="Handling mode" value={mode.darazHandlingMode} onChange={x=>setMode(s=>({...s,darazHandlingMode:x}))}><option value="dropoff">Drop-off</option><option value="pickup">Pickup (rider collects)</option></SelectField>
             <SelectField label="Delivery type" value={mode.darazDeliveryType} onChange={x=>setMode(s=>({...s,darazDeliveryType:x}))}><option value="door">Door-to-Door</option><option value="collection">Collection Point</option></SelectField>
             <SelectField label="Shipping zone" value={mode.darazZone} onChange={x=>setMode(s=>({...s,darazZone:x}))}><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option><option value="4">Zone 4</option></SelectField>

@@ -101,6 +101,24 @@ test("Daraz pickup mode uses the weight-based pickup fee, not the drop-off fee",
   assert.equal(pickup.handlingFee, 30);
 });
 
+test("Daraz bulky item (8kg+) adds a shipping surcharge", () => {
+  const light = darazFbmProfit({
+    sellingPrice: 2000, purchasePrice: 900, extraCharges: 0, penalties: 0,
+    commissionPercent: 18, paymentFeePercent: 2.25, vatPercent: 15,
+    voucherOn: false, voucherPercent: 0, freeShippingMaxOn: false,
+    weightGrams: 500, pickup: false, deliveryType: "door", zone: 1,
+    pickPackFee: 60, storageFee: 0,
+  });
+  const bulky = darazFbmProfit({
+    sellingPrice: 2000, purchasePrice: 900, extraCharges: 0, penalties: 0,
+    commissionPercent: 18, paymentFeePercent: 2.25, vatPercent: 15,
+    voucherOn: false, voucherPercent: 0, freeShippingMaxOn: false,
+    weightGrams: 8000, pickup: false, deliveryType: "door", zone: 1,
+    pickPackFee: 60, storageFee: 0,
+  });
+  assert.equal(bulky.shippingFee - light.shippingFee > 100, true);
+});
+
 test("Daraz penalties reduce profit for both FBM and FBD", () => {
   const withPenalty = darazFbmProfit({
     sellingPrice: 2000, purchasePrice: 900, extraCharges: 0, penalties: 100,
