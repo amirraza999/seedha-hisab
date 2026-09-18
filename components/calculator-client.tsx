@@ -50,6 +50,8 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
     salary: "200000", annual: "2400000", income: "2400000", property: "10000000", productCost: "1200", sellingPrice: "2500", orders: "100", deliveryRate: "70", courier: "220", returnCourier: "180", packaging: "70", codFee: "1", adSpend: "15000", overhead: "8000", cost: "1000", selling: "1500", desiredMargin: "30", land: "5", marlaStandard: "225", units: "250", unitRate: "34.47", fixed: "0", fca: "0", tax: "18", cash: "300000", bank: "600000", gold: "500000", silver: "0", investments: "200000", inventory: "0", receivables: "0", liabilities: "100000", nisab: "250000", deductions: "10000", price: "45000", discount1: "25", discount2: "0", darazSp: "2000", darazPurchase: "900", darazExtra: "0", darazPenalties: "0", darazVoucherPct: "3", darazWeight: "500", darazPickPack: "60", darazStorage: "0"
   });
   const [mode, setMode] = useState<Record<string,string>>({ incomePeriod: "monthly", pseB: "yes", atl: "yes", transaction: "purchase", landUnit: "marla", electricityMode: "manual", disco: "lesco", consumerCategory: "protected", darazCategory: "18", darazProvince: "15", darazVoucherOn: "no", darazFsmOn: "no", darazHandlingMode: "dropoff", darazDeliveryType: "door", darazZone: "1" });
+  const [darazTab, setDarazTab] = useState<"fbm" | "fbd">("fbm");
+  const [darazCalculated, setDarazCalculated] = useState(false);
   const set = (key: string) => (value: string) => setV(s => ({...s, [key]: value}));
 
   if (slug === "salary-tax-calculator-pakistan" || slug === "net-salary-calculator-pakistan") {
@@ -75,6 +77,8 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
   }
 
   if (slug === "daraz-profit-calculator") {
+    const setD = (key: string) => (value: string) => { setDarazCalculated(false); setV(s => ({...s, [key]: value})); };
+    const setDMode = (key: string) => (value: string) => { setDarazCalculated(false); setMode(s => ({...s, [key]: value})); };
     const shared = {
       sellingPrice: num(v.darazSp), purchasePrice: num(v.darazPurchase), extraCharges: num(v.darazExtra), penalties: num(v.darazPenalties),
       commissionPercent: num(mode.darazCategory), paymentFeePercent: DARAZ_PAYMENT_FEE_PCT, vatPercent: num(mode.darazProvince),
@@ -87,56 +91,84 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
     async function copy() { await navigator.clipboard?.writeText(shareText); }
     async function share() { if (navigator.share) await navigator.share({ title: "Daraz FBM vs FBD", text: shareText }); else await copy(); }
     function whatsapp() { window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank", "noopener,noreferrer"); }
+    const dash = "—";
     return <div className="grid min-w-0 gap-5">
+      <div className="flex justify-center">
+        <div className="inline-flex rounded-full border border-slate-200 bg-white p-1">
+          <button type="button" onClick={() => setDarazTab("fbm")} className={`rounded-full px-5 py-2 text-sm font-bold transition ${darazTab === "fbm" ? "bg-[#102a43] text-white" : "text-slate-500"}`}>FBM</button>
+          <button type="button" onClick={() => setDarazTab("fbd")} className={`rounded-full px-5 py-2 text-sm font-bold transition ${darazTab === "fbd" ? "bg-[#102a43] text-white" : "text-slate-500"}`}>FBD</button>
+        </div>
+      </div>
+      <div className="grid min-w-0 gap-4 md:grid-cols-2">
+        <div className={`min-w-0 rounded-2xl border p-5 transition ${darazTab === "fbm" ? "border-[#102a43] bg-white shadow-md" : "border-slate-200 bg-slate-50/70 opacity-60"}`}>
+          <p className="text-xs font-extrabold uppercase tracking-[.12em] text-[#102a43]">FBM · Fulfilled by Merchant</p>
+          <div className="mt-4 grid gap-3">
+            <SelectField label="Category" value={mode.darazCategory} onChange={setDMode("darazCategory")}>{darazCategories.map(c=><option key={c.value} value={c.value}>{c.label}</option>)}</SelectField>
+            <Field label="Payment fee" value={String(DARAZ_PAYMENT_FEE_PCT)} onChange={() => {}} suffix="%" hint="Fixed by Daraz on every delivered order." />
+          </div>
+        </div>
+        <div className={`min-w-0 rounded-2xl border p-5 transition ${darazTab === "fbd" ? "border-[#102a43] bg-white shadow-md" : "border-slate-200 bg-slate-50/70 opacity-60"}`}>
+          <p className="text-xs font-extrabold uppercase tracking-[.12em] text-[#102a43]">FBD · Fulfilled by Daraz</p>
+          <div className="mt-4 grid gap-3">
+            <SelectField label="Category" value={mode.darazCategory} onChange={setDMode("darazCategory")}>{darazCategories.map(c=><option key={c.value} value={c.value}>{c.label}</option>)}</SelectField>
+            <Field label="Payment fee" value={String(DARAZ_PAYMENT_FEE_PCT)} onChange={() => {}} suffix="%" hint="Same category and payment fee apply to both models for the same product." />
+          </div>
+        </div>
+      </div>
       <div className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 sm:p-6">
         <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <SelectField label="Category" value={mode.darazCategory} onChange={x=>setMode(s=>({...s,darazCategory:x}))}>{darazCategories.map(c=><option key={c.value} value={c.value}>{c.label}</option>)}</SelectField>
-          <Field label="Selling price" value={v.darazSp} onChange={set("darazSp")} suffix="PKR" />
-          <SelectField label="Province (VAT)" value={mode.darazProvince} onChange={x=>setMode(s=>({...s,darazProvince:x}))}>{darazProvinces.map(p=><option key={p.value} value={p.value}>{p.label}</option>)}</SelectField>
-          <Field label="Purchasing price" value={v.darazPurchase} onChange={set("darazPurchase")} suffix="PKR" />
-          <Field label="Extra charges (ads/packaging)" value={v.darazExtra} onChange={set("darazExtra")} suffix="PKR" />
-          <Field label="Penalties" value={v.darazPenalties} onChange={set("darazPenalties")} suffix="PKR" hint="Return or quality-issue penalties, if any." />
-          <ToggleField label="Voucher Max" checked={mode.darazVoucherOn === "yes"} onChange={c=>setMode(s=>({...s,darazVoucherOn:c?"yes":"no"}))} />
-          {mode.darazVoucherOn === "yes" && <Field label="Voucher %" value={v.darazVoucherPct} onChange={set("darazVoucherPct")} suffix="%" />}
-          <ToggleField label="Free Shipping Max (6% of price, Rs 30–200)" checked={mode.darazFsmOn === "yes"} onChange={c=>setMode(s=>({...s,darazFsmOn:c?"yes":"no"}))} />
+          <Field label="Selling price" value={v.darazSp} onChange={setD("darazSp")} suffix="PKR" />
+          <SelectField label="Province (VAT)" value={mode.darazProvince} onChange={setDMode("darazProvince")}>{darazProvinces.map(p=><option key={p.value} value={p.value}>{p.label}</option>)}</SelectField>
+          <Field label="Purchasing price" value={v.darazPurchase} onChange={setD("darazPurchase")} suffix="PKR" />
+          <Field label="Extra charges (ads/packaging)" value={v.darazExtra} onChange={setD("darazExtra")} suffix="PKR" />
+          <Field label="Penalties" value={v.darazPenalties} onChange={setD("darazPenalties")} suffix="PKR" hint="Return or quality-issue penalties, if any." />
+          <ToggleField label="Voucher Max" checked={mode.darazVoucherOn === "yes"} onChange={c=>{setDarazCalculated(false); setMode(s=>({...s,darazVoucherOn:c?"yes":"no"}));}} />
+          {mode.darazVoucherOn === "yes" && <Field label="Voucher %" value={v.darazVoucherPct} onChange={setD("darazVoucherPct")} suffix="%" />}
+          <ToggleField label="Free Shipping Max (6% of price, Rs 30–200)" checked={mode.darazFsmOn === "yes"} onChange={c=>{setDarazCalculated(false); setMode(s=>({...s,darazFsmOn:c?"yes":"no"}));}} />
         </div>
       </div>
       <div className="grid min-w-0 gap-4 md:grid-cols-2">
         <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5">
-          <p className="text-xs font-extrabold uppercase tracking-[.12em] text-slate-500">FBM · Fulfilled by Merchant</p>
+          <p className="text-xs font-extrabold uppercase tracking-[.12em] text-slate-500">FBM fulfilment details</p>
           <div className="mt-4 grid gap-3">
-            <Field label="Weight" value={v.darazWeight} onChange={set("darazWeight")} suffix="grams" hint={isBulkyItem(num(v.darazWeight)) ? "Bulky item (8kg+) — a shipping surcharge is applied." : undefined} />
-            <SelectField label="Handling mode" value={mode.darazHandlingMode} onChange={x=>setMode(s=>({...s,darazHandlingMode:x}))}><option value="dropoff">Drop-off</option><option value="pickup">Pickup (rider collects)</option></SelectField>
-            <SelectField label="Delivery type" value={mode.darazDeliveryType} onChange={x=>setMode(s=>({...s,darazDeliveryType:x}))}><option value="door">Door-to-Door</option><option value="collection">Collection Point</option></SelectField>
-            <SelectField label="Shipping zone" value={mode.darazZone} onChange={x=>setMode(s=>({...s,darazZone:x}))}><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option><option value="4">Zone 4</option></SelectField>
+            <Field label="Weight" value={v.darazWeight} onChange={setD("darazWeight")} suffix="grams" hint={isBulkyItem(num(v.darazWeight)) ? "Bulky item (8kg+) — a shipping surcharge is applied." : undefined} />
+            <SelectField label="Handling mode" value={mode.darazHandlingMode} onChange={setDMode("darazHandlingMode")}><option value="dropoff">Drop-off</option><option value="pickup">Pickup (rider collects)</option></SelectField>
+            <SelectField label="Delivery type" value={mode.darazDeliveryType} onChange={setDMode("darazDeliveryType")}><option value="door">Door-to-Door</option><option value="collection">Collection Point</option></SelectField>
+            <SelectField label="Shipping zone" value={mode.darazZone} onChange={setDMode("darazZone")}><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option><option value="4">Zone 4</option></SelectField>
           </div>
         </div>
         <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5">
-          <p className="text-xs font-extrabold uppercase tracking-[.12em] text-slate-500">FBD · Fulfilled by Daraz</p>
+          <p className="text-xs font-extrabold uppercase tracking-[.12em] text-slate-500">FBD fulfilment details</p>
           <div className="mt-4 grid gap-3">
-            <Field label="Pick & Pack fee" value={v.darazPickPack} onChange={set("darazPickPack")} suffix="PKR" />
-            <Field label="Monthly storage fee" value={v.darazStorage} onChange={set("darazStorage")} suffix="PKR" hint="Only if stock sits longer than about 30 days." />
+            <Field label="Pick & Pack fee" value={v.darazPickPack} onChange={setD("darazPickPack")} suffix="PKR" />
+            <Field label="Monthly storage fee" value={v.darazStorage} onChange={setD("darazStorage")} suffix="PKR" hint="Only if stock sits longer than about 30 days." />
           </div>
         </div>
       </div>
+      <div className="flex justify-center">
+        <Button onClick={() => setDarazCalculated(true)} className="rounded-xl bg-[#102a43] px-8 py-6 text-base font-extrabold text-white hover:bg-[#163b5e]">Calculate Profit</Button>
+      </div>
       <div className="grid min-w-0 gap-4 md:grid-cols-2">
-        {[["FBM result", fbm, [["Commission",fbm.commissionAmount],["Payment fee",fbm.paymentFeeAmount],["Shipping fee",fbm.shippingFee],["Handling fee",fbm.handlingFee],["VAT",fbm.vatAmount],["Penalties",fbm.penalties]]] as const, ["FBD result", fbd, [["Commission",fbd.commissionAmount],["Payment fee",fbd.paymentFeeAmount],["Pick & Pack fee",fbd.pickPackFee],["Storage fee",fbd.storageFee],["VAT",fbd.vatAmount],["Penalties",fbd.penalties]]] as const].map(([title, r, lines]) => (
+        {([["FBM result", fbm, [["Commission",fbm.commissionAmount],["Payment fee",fbm.paymentFeeAmount],["Shipping fee",fbm.shippingFee],["Handling fee",fbm.handlingFee],["VAT",fbm.vatAmount],["Penalties",fbm.penalties]] as const], ["FBD result", fbd, [["Commission",fbd.commissionAmount],["Payment fee",fbd.paymentFeeAmount],["Pick & Pack fee",fbd.pickPackFee],["Storage fee",fbd.storageFee],["VAT",fbd.vatAmount],["Penalties",fbd.penalties]] as const]] as const).map(([title, r, lines]) => (
           <section key={title} aria-live="polite" className="min-w-0 overflow-hidden rounded-2xl bg-[#102a43] text-white shadow-[0_18px_50px_rgba(15,42,67,.18)]">
             <div className="border-b border-white/10 p-6">
               <p className="text-xs font-extrabold uppercase tracking-[.16em] text-emerald-300">{title}</p>
-              <p className={`mt-2 text-3xl font-black tracking-tight sm:text-4xl ${r.profit < 0 ? "text-red-400" : ""}`}>{money(r.profit)}</p>
-              <p className="mt-3 text-sm leading-6 text-slate-300">Margin {r.margin.toFixed(1)}% · ROI {r.roi.toFixed(1)}%</p>
+              <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
+                <div><dt className="text-[10px] font-bold uppercase tracking-wide text-slate-400">You Get</dt><dd className="mt-1 text-lg font-black">{darazCalculated ? money(r.profit + r.costTotal) : dash}</dd></div>
+                <div><dt className="text-[10px] font-bold uppercase tracking-wide text-slate-400">ROI</dt><dd className="mt-1 text-lg font-black">{darazCalculated ? `${r.roi.toFixed(1)}%` : dash}</dd></div>
+                <div><dt className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Profit</dt><dd className={`mt-1 text-lg font-black ${darazCalculated && r.profit < 0 ? "text-red-400" : ""}`}>{darazCalculated ? money(r.profit) : dash}</dd></div>
+              </dl>
             </div>
-            <dl className="grid min-w-0 gap-px bg-white/10 sm:grid-cols-2">{lines.map(([label,value]) => <div key={label} className="min-w-0 bg-[#102a43] p-4"><dt className="text-xs font-semibold text-slate-400">− {label}</dt><dd className="mt-1 text-base font-bold">{money(value)}</dd></div>)}</dl>
+            {darazCalculated && <dl className="grid min-w-0 gap-px bg-white/10 sm:grid-cols-2">{lines.map(([label,value]) => <div key={label} className="min-w-0 bg-[#102a43] p-4"><dt className="text-xs font-semibold text-slate-400">− {label}</dt><dd className="mt-1 text-base font-bold">{money(value)}</dd></div>)}</dl>}
           </section>
         ))}
       </div>
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center font-bold text-emerald-900">{winner}</div>
-      <div className="flex flex-wrap gap-2">
+      {darazCalculated && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center font-bold text-emerald-900">{winner}</div>}
+      {darazCalculated && <div className="flex flex-wrap gap-2">
         <Button onClick={copy} variant="secondary" className="rounded-xl"><Copy size={16} /> Copy result</Button>
         <Button onClick={whatsapp} className="rounded-xl bg-[#25D366] text-[#06251c] hover:bg-[#1fbd5a]"><WhatsAppIcon /> WhatsApp</Button>
         <Button onClick={share} className="rounded-xl bg-emerald-500 text-[#06251c] hover:bg-emerald-400"><Share2 size={16} /> Share</Button>
-      </div>
+      </div>}
       <p className="text-xs leading-5 text-slate-500">Category commission, payment fee and VAT are commonly reported estimates, not an official Daraz price list. Confirm exact rates in your Daraz Seller Center before pricing a product.</p>
     </div>;
   }
