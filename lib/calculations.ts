@@ -141,15 +141,25 @@ export function fbmShippingFee(zone: 1 | 2 | 3 | 4, weightGrams: number, deliver
   return fee;
 }
 
-export function fbmHandlingFee(weightGrams: number, pickup: boolean, override = 0) {
+/** Drop-off item handling fee, banded by selling price (Rs 10-60), per commonly reported 2026 Daraz seller fees. */
+export function fbmDropoffHandlingFee(sellingPrice: number, override = 0) {
   if (override > 0) return override;
-  let base = weightGrams < 500 ? 10 : weightGrams < 1000 ? 20 : weightGrams < 2000 ? 35 : 60;
-  if (pickup) base = Math.min(base * 3, 200);
-  return base;
+  return sellingPrice < 500 ? 10 : sellingPrice < 1500 ? 20 : sellingPrice < 3000 ? 35 : 60;
+}
+
+/** Pickup Service Fee, banded by weight (Rs 30-200); replaces the drop-off handling fee entirely when pickup is used. */
+export function fbmPickupFee(weightGrams: number, override = 0) {
+  if (override > 0) return override;
+  return weightGrams < 500 ? 30 : weightGrams < 1000 ? 60 : weightGrams < 2000 ? 100 : weightGrams < 5000 ? 150 : 200;
+}
+
+export function fbmHandlingFee(sellingPrice: number, weightGrams: number, pickup: boolean, override = 0) {
+  if (override > 0) return override;
+  return pickup ? fbmPickupFee(weightGrams) : fbmDropoffHandlingFee(sellingPrice);
 }
 
 export type DarazProfitInput = {
-  sellingPrice: number; purchasePrice: number; extraCharges: number;
+  sellingPrice: number; purchasePrice: number; extraCharges: number; penalties: number;
   commissionPercent: number; paymentFeePercent: number; vatPercent: number;
   voucherOn: boolean; voucherPercent: number; freeShippingMaxOn: boolean;
   weightGrams: number; pickup: boolean; deliveryType: "door" | "collection"; zone: 1 | 2 | 3 | 4;
@@ -162,8 +172,9 @@ function darazSharedDeductions(input: DarazProfitInput) {
   const paymentFeeAmount = sp * percent(input.paymentFeePercent) / 100;
   const voucherAmount = input.voucherOn ? sp * percent(input.voucherPercent) / 100 : 0;
   const freeShippingMaxAmount = input.freeShippingMaxOn ? Math.min(Math.max(sp * 0.06, 30), 200) : 0;
-  const costTotal = Math.max(0, input.purchasePrice) + Math.max(0, input.extraCharges);
-  return { sp, commissionAmount, paymentFeeAmount, voucherAmount, freeShippingMaxAmount, costTotal };
+  const penalties = Math.max(0, input.penalties);
+  const costTotal = Math.max(0, input.purchasePrice) + Math.max(0, input.extraCharges) + penalties;
+  return { sp, commissionAmount, paymentFeeAmount, voucherAmount, freeShippingMaxAmount, penalties, costTotal };
 }
 
 function summarize(sp: number, profit: number, costTotal: number) {
@@ -171,23 +182,23 @@ function summarize(sp: number, profit: number, costTotal: number) {
 }
 
 export function darazFbmProfit(input: DarazProfitInput) {
-  const { sp, commissionAmount, paymentFeeAmount, voucherAmount, freeShippingMaxAmount, costTotal } = darazSharedDeductions(input);
+  const { sp, commissionAmount, paymentFeeAmount, voucherAmount, freeShippingMaxAmount, penalties, costTotal } = darazSharedDeductions(input);
   const shippingFee = fbmShippingFee(input.zone, input.weightGrams, input.deliveryType);
-  const handlingFee = fbmHandlingFee(input.weightGrams, input.pickup);
+  const handlingFee = fbmHandlingFee(sp, input.weightGrams, input.pickup);
   const vatBase = commissionAmount + paymentFeeAmount + handlingFee;
   const vatAmount = vatBase * percent(input.vatPercent) / 100;
   const totalDeductions = commissionAmount + paymentFeeAmount + voucherAmount + freeShippingMaxAmount + shippingFee + handlingFee + vatAmount;
   const profit = sp - totalDeductions - costTotal;
-  return { commissionAmount, paymentFeeAmount, voucherAmount, freeShippingMaxAmount, shippingFee, handlingFee, vatAmount, costTotal, ...summarize(sp, profit, costTotal) };
+  return { commissionAmount, paymentFeeAmount, voucherAmount, freeShippingMaxAmount, shippingFee, handlingFee, vatAmount, penalties, costTotal, ...summarize(sp, profit, costTotal) };
 }
 
 export function darazFbdProfit(input: DarazProfitInput) {
-  const { sp, commissionAmount, paymentFeeAmount, voucherAmount, freeShippingMaxAmount, costTotal } = darazSharedDeductions(input);
+  const { sp, commissionAmount, paymentFeeAmount, voucherAmount, freeShippingMaxAmount, penalties, costTotal } = darazSharedDeductions(input);
   const pickPackFee = Math.max(0, input.pickPackFee);
   const storageFee = Math.max(0, input.storageFee);
   const vatBase = commissionAmount + paymentFeeAmount + pickPackFee;
   const vatAmount = vatBase * percent(input.vatPercent) / 100;
   const totalDeductions = commissionAmount + paymentFeeAmount + voucherAmount + freeShippingMaxAmount + pickPackFee + storageFee + vatAmount;
   const profit = sp - totalDeductions - costTotal;
-  return { commissionAmount, paymentFeeAmount, voucherAmount, freeShippingMaxAmount, pickPackFee, storageFee, vatAmount, costTotal, ...summarize(sp, profit, costTotal) };
+  return { commissionAmount, paymentFeeAmount, voucherAmount, freeShippingMaxAmount, pickPackFee, storageFee, vatAmount, penalties, costTotal, ...summarize(sp, profit, costTotal) };
 }

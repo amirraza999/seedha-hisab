@@ -47,7 +47,7 @@ function Result({ title, primary, rows, formula, note }: { title: string; primar
 
 export function CalculatorClient({ slug }: { slug: ToolSlug }) {
   const [v, setV] = useState<Record<string,string>>({
-    salary: "200000", annual: "2400000", income: "2400000", property: "10000000", productCost: "1200", sellingPrice: "2500", orders: "100", deliveryRate: "70", courier: "220", returnCourier: "180", packaging: "70", codFee: "1", adSpend: "15000", overhead: "8000", cost: "1000", selling: "1500", desiredMargin: "30", land: "5", marlaStandard: "225", units: "250", unitRate: "34.47", fixed: "0", fca: "0", tax: "18", cash: "300000", bank: "600000", gold: "500000", silver: "0", investments: "200000", inventory: "0", receivables: "0", liabilities: "100000", nisab: "250000", deductions: "10000", price: "45000", discount1: "25", discount2: "0", darazSp: "2000", darazPurchase: "900", darazExtra: "0", darazVoucherPct: "3", darazWeight: "500", darazPickPack: "60", darazStorage: "0"
+    salary: "200000", annual: "2400000", income: "2400000", property: "10000000", productCost: "1200", sellingPrice: "2500", orders: "100", deliveryRate: "70", courier: "220", returnCourier: "180", packaging: "70", codFee: "1", adSpend: "15000", overhead: "8000", cost: "1000", selling: "1500", desiredMargin: "30", land: "5", marlaStandard: "225", units: "250", unitRate: "34.47", fixed: "0", fca: "0", tax: "18", cash: "300000", bank: "600000", gold: "500000", silver: "0", investments: "200000", inventory: "0", receivables: "0", liabilities: "100000", nisab: "250000", deductions: "10000", price: "45000", discount1: "25", discount2: "0", darazSp: "2000", darazPurchase: "900", darazExtra: "0", darazPenalties: "0", darazVoucherPct: "3", darazWeight: "500", darazPickPack: "60", darazStorage: "0"
   });
   const [mode, setMode] = useState<Record<string,string>>({ incomePeriod: "monthly", pseB: "yes", atl: "yes", transaction: "purchase", landUnit: "marla", electricityMode: "manual", disco: "lesco", consumerCategory: "protected", darazCategory: "18", darazProvince: "15", darazVoucherOn: "no", darazFsmOn: "no", darazHandlingMode: "dropoff", darazDeliveryType: "door", darazZone: "1" });
   const set = (key: string) => (value: string) => setV(s => ({...s, [key]: value}));
@@ -76,7 +76,7 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
 
   if (slug === "daraz-profit-calculator") {
     const shared = {
-      sellingPrice: num(v.darazSp), purchasePrice: num(v.darazPurchase), extraCharges: num(v.darazExtra),
+      sellingPrice: num(v.darazSp), purchasePrice: num(v.darazPurchase), extraCharges: num(v.darazExtra), penalties: num(v.darazPenalties),
       commissionPercent: num(mode.darazCategory), paymentFeePercent: DARAZ_PAYMENT_FEE_PCT, vatPercent: num(mode.darazProvince),
       voucherOn: mode.darazVoucherOn === "yes", voucherPercent: num(v.darazVoucherPct), freeShippingMaxOn: mode.darazFsmOn === "yes",
     };
@@ -95,6 +95,7 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
           <SelectField label="Province (VAT)" value={mode.darazProvince} onChange={x=>setMode(s=>({...s,darazProvince:x}))}>{darazProvinces.map(p=><option key={p.value} value={p.value}>{p.label}</option>)}</SelectField>
           <Field label="Purchasing price" value={v.darazPurchase} onChange={set("darazPurchase")} suffix="PKR" />
           <Field label="Extra charges (ads/packaging)" value={v.darazExtra} onChange={set("darazExtra")} suffix="PKR" />
+          <Field label="Penalties" value={v.darazPenalties} onChange={set("darazPenalties")} suffix="PKR" hint="Return or quality-issue penalties, if any." />
           <ToggleField label="Voucher Max" checked={mode.darazVoucherOn === "yes"} onChange={c=>setMode(s=>({...s,darazVoucherOn:c?"yes":"no"}))} />
           {mode.darazVoucherOn === "yes" && <Field label="Voucher %" value={v.darazVoucherPct} onChange={set("darazVoucherPct")} suffix="%" />}
           <ToggleField label="Free Shipping Max (6% of price, Rs 30–200)" checked={mode.darazFsmOn === "yes"} onChange={c=>setMode(s=>({...s,darazFsmOn:c?"yes":"no"}))} />
@@ -119,7 +120,7 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
         </div>
       </div>
       <div className="grid min-w-0 gap-4 md:grid-cols-2">
-        {[["FBM result", fbm, [["Commission",fbm.commissionAmount],["Payment fee",fbm.paymentFeeAmount],["Shipping fee",fbm.shippingFee],["Handling fee",fbm.handlingFee],["VAT",fbm.vatAmount]]] as const, ["FBD result", fbd, [["Commission",fbd.commissionAmount],["Payment fee",fbd.paymentFeeAmount],["Pick & Pack fee",fbd.pickPackFee],["Storage fee",fbd.storageFee],["VAT",fbd.vatAmount]]] as const].map(([title, r, lines]) => (
+        {[["FBM result", fbm, [["Commission",fbm.commissionAmount],["Payment fee",fbm.paymentFeeAmount],["Shipping fee",fbm.shippingFee],["Handling fee",fbm.handlingFee],["VAT",fbm.vatAmount],["Penalties",fbm.penalties]]] as const, ["FBD result", fbd, [["Commission",fbd.commissionAmount],["Payment fee",fbd.paymentFeeAmount],["Pick & Pack fee",fbd.pickPackFee],["Storage fee",fbd.storageFee],["VAT",fbd.vatAmount],["Penalties",fbd.penalties]]] as const].map(([title, r, lines]) => (
           <section key={title} aria-live="polite" className="min-w-0 overflow-hidden rounded-2xl bg-[#102a43] text-white shadow-[0_18px_50px_rgba(15,42,67,.18)]">
             <div className="border-b border-white/10 p-6">
               <p className="text-xs font-extrabold uppercase tracking-[.16em] text-emerald-300">{title}</p>

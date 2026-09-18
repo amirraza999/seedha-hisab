@@ -74,7 +74,7 @@ test("electricity slab estimate never drops units beyond the last defined slab",
 
 test("Daraz FBM vs FBD profit comparison on a fashion item", () => {
   const input = {
-    sellingPrice: 2000, purchasePrice: 900, extraCharges: 0,
+    sellingPrice: 2000, purchasePrice: 900, extraCharges: 0, penalties: 0,
     commissionPercent: 18, paymentFeePercent: 2.25, vatPercent: 15,
     voucherOn: false, voucherPercent: 0, freeShippingMaxOn: false,
     weightGrams: 500, pickup: false, deliveryType: "door", zone: 1,
@@ -82,12 +82,35 @@ test("Daraz FBM vs FBD profit comparison on a fashion item", () => {
   };
   const fbm = darazFbmProfit(input);
   assert.equal(fbm.shippingFee, 100);
-  assert.equal(fbm.handlingFee, 20);
-  assert.equal(fbm.vatAmount, 63.75);
-  assert.equal(fbm.profit, 511.25);
+  assert.equal(fbm.handlingFee, 35);
+  assert.equal(fbm.vatAmount, 66);
+  assert.equal(fbm.profit, 494);
   const fbd = darazFbdProfit(input);
   assert.equal(fbd.vatAmount, 69.75);
   assert.equal(fbd.profit, 565.25);
+});
+
+test("Daraz pickup mode uses the weight-based pickup fee, not the drop-off fee", () => {
+  const pickup = darazFbmProfit({
+    sellingPrice: 2000, purchasePrice: 900, extraCharges: 0, penalties: 0,
+    commissionPercent: 18, paymentFeePercent: 2.25, vatPercent: 15,
+    voucherOn: false, voucherPercent: 0, freeShippingMaxOn: false,
+    weightGrams: 400, pickup: true, deliveryType: "door", zone: 1,
+    pickPackFee: 60, storageFee: 0,
+  });
+  assert.equal(pickup.handlingFee, 30);
+});
+
+test("Daraz penalties reduce profit for both FBM and FBD", () => {
+  const withPenalty = darazFbmProfit({
+    sellingPrice: 2000, purchasePrice: 900, extraCharges: 0, penalties: 100,
+    commissionPercent: 18, paymentFeePercent: 2.25, vatPercent: 15,
+    voucherOn: false, voucherPercent: 0, freeShippingMaxOn: false,
+    weightGrams: 500, pickup: false, deliveryType: "door", zone: 1,
+    pickPackFee: 60, storageFee: 0,
+  });
+  assert.equal(withPenalty.penalties, 100);
+  assert.equal(withPenalty.profit, 394);
 });
 
 test("COD model accounts for delivered and returned orders", () => {
