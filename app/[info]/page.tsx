@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ContactForm } from "@/components/contact-form";
 import { rootRedirects } from "@/lib/redirects";
 
 const pages: Record<
@@ -30,15 +31,15 @@ const pages: Record<
   contact: {
     title: "Contact",
     intro:
-      "A direct contact channel will be added after the owner approves the public business email.",
+      "Send a message using the form below for corrections, questions or business enquiries.",
     sections: [
       [
         "Report an issue",
-        "For now, keep the page URL, your input values and the result you believe is wrong. Do not include passwords, tax credentials or sensitive account information.",
+        "Include the page URL, your input values and the result you believe is wrong. Do not include passwords, tax credentials or sensitive account information.",
       ],
       [
         "Business enquiries",
-        "Advertising, partnerships and press enquiries will use a separate approved address after launch.",
+        "Advertising, partnership and press enquiries are welcome through the same form.",
       ],
     ],
   },
@@ -127,7 +128,10 @@ const pages: Record<
         "Cookies and ads",
         "Advertising is disabled during development. If AdSense is enabled later, this policy and any required consent controls will be updated first.",
       ],
-      ["Contact forms", "No public contact form is active in this preview."],
+      [
+        "Contact form",
+        "The contact form sends your name, email and message to our inbox through a third-party form-delivery service (Web3Forms) using an encrypted connection. It is not used for advertising and is not shared with other third parties.",
+      ],
     ],
   },
   terms: {
@@ -220,6 +224,11 @@ export default async function InfoPage({
             </section>
           ))}
         </div>
+        {info === "contact" && (
+          <div className="mt-8">
+            <ContactForm />
+          </div>
+        )}
         {info === "sources" && (
           <section className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
             <h2 className="text-lg font-extrabold text-[#102a43]">
