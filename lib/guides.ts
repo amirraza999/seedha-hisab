@@ -149,6 +149,26 @@ export const guides: Guide[] = [
     ],
     sources:[{organization:"Federal Board of Revenue (FBR)",title:"Finance Act 2026 — First Schedule, Part I, Division I",url:financeAct,note:"Same salary-slab source used by the salary tax calculator."}],
   },
+  {
+    slug:"daraz-fbm-vs-fbd-which-is-more-profitable",category:"Business",featured:false,
+    title:"Daraz FBM vs FBD: Which Fulfilment Model Is More Profitable?",description:"Compare Fulfilled-by-Merchant and Fulfilled-by-Daraz profit on the same product, with a worked Rs 2,000 fashion-item example and the fee categories that separate the two models.",
+    directAnswer:"Neither model is universally more profitable — FBM avoids Daraz's flat Pick & Pack and storage fees but pays for shipping and handling by weight and zone, while FBD replaces those with fixed per-order and monthly charges. Which one nets more depends on the product's weight, how fast it sells and your own packaging cost, so compare both for each product rather than picking one model for the whole store.",
+    period:"2026 fee estimates",verified:"18 September 2026",freshness:"Review required",calculatorSlug:"daraz-profit-calculator",calculatorLabel:"Compare FBM vs FBD for your product",
+    takeaways:["Commission, payment fee and VAT are identical for FBM and FBD on the same product.","FBM shipping and handling scale with weight and shipping zone.","FBD replaces shipping and handling with a flat Pick & Pack fee plus optional storage.","Light, fast-moving items often net more under FBD; heavy or slow-moving stock can cost more in FBD storage than it saves in shipping."],
+    sections:[
+      {heading:"What's shared between FBM and FBD",paragraphs:["Both models deduct the same category-based commission, the same 2.25% payment fee, and VAT calculated on those Daraz fees at the seller's provincial rate (15% in Sindh, KPK and Balochistan; 16% in Punjab). None of these three change based on fulfilment model — only the fulfilment costs differ."],formula:"Shared deductions = commission + payment fee + VAT on (commission + payment fee + fulfilment fee)"},
+      {heading:"Where FBM and FBD diverge",paragraphs:["FBM (Fulfilled by Merchant) charges a shipping fee that rises with parcel weight and the shipping zone, plus a handling fee banded by selling price for drop-off or a separate weight-banded fee if a rider picks up the parcel. Items at or above 8kg carry an additional bulky-item surcharge.","FBD (Fulfilled by Daraz) replaces both of those with a flat Pick & Pack fee per delivered order, plus an optional monthly storage charge if inventory sits unsold for roughly 30 days or longer."],bullets:["FBM: shipping fee (by zone and weight) + handling fee (by price or weight)","FBD: Pick & Pack fee (flat) + storage fee (only if aged)"]},
+      {heading:"Worked example: Rs 2,000 fashion item",paragraphs:["A Rs 2,000 item costing Rs 900 to source, sold to a buyer in Sindh, weighing 500g and shipped door-to-door in Zone 1: under FBM with drop-off handling, the estimate nets about Rs 494 profit (24.7% margin). Under FBD with a Rs 60 Pick & Pack fee and no storage cost, the estimate nets about Rs 565 profit (28.3% margin) — FBD comes out about Rs 71 ahead for this specific light, fast-selling item."]},
+      {heading:"When FBM can win instead",paragraphs:["Heavier items, slow-moving stock that accrues FBD storage charges over several months, or sellers who already have efficient in-house packing and a low-cost courier account can find FBM competitive or cheaper. There is no single right answer — the calculator is built to compare both for the exact product in front of you."]},
+    ],
+    table:{title:"FBM vs FBD deduction categories",caption:"Commission, payment fee and VAT are identical; only the fulfilment line differs.",columns:["Deduction","FBM","FBD"],rows:[["Commission","Category rate","Category rate (same)"],["Payment fee","2.25%","2.25% (same)"],["Fulfilment cost","Shipping + handling (by weight/zone)","Pick & Pack (flat) + storage (if aged)"],["VAT base","Commission + payment + handling","Commission + payment + Pick & Pack"]]},
+    faqs:[
+      {question:"Do FBM and FBD pay different commission on the same product?",answer:"No. Category commission, the 2.25% payment fee and provincial VAT are the same regardless of fulfilment model — only the fulfilment-cost line item differs."},
+      {question:"Is FBD always cheaper because it has fewer line items?",answer:"Not necessarily. A single flat Pick & Pack fee can beat per-kilogram shipping for light items, but monthly storage on slow-moving or heavy stock can make FBD more expensive over time."},
+      {question:"What counts as a bulky item?",answer:"Parcels at or above roughly 8kg are treated as bulky and carry an estimated shipping surcharge under FBM in this calculator's model."},
+    ],
+    sources:[{organization:"Seedha Hisab",title:"Publicly reported Daraz seller fee structure (2026)",note:"Category commission and fee bands are commonly reported estimates, not an official Daraz price list; not affiliated with or endorsed by Daraz. Confirm exact figures in your Daraz Seller Center."}],
+  },
 ];
 
 export function getGuide(slug: string) { return guides.find((guide) => guide.slug === slug); }
