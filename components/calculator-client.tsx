@@ -17,7 +17,7 @@ function Field({ label, value, onChange, suffix, hint }: { label: string; value:
 }
 
 function SelectField({ label, value, onChange, children }: { label: string; value: string; onChange: (v: string) => void; children: React.ReactNode }) {
-  return <label className="grid gap-2 text-sm font-bold text-slate-700"><span>{label}</span><select value={value} onChange={e => onChange(e.target.value)} className="h-12 rounded-xl border border-slate-300 bg-white px-3 text-base font-semibold outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100">{children}</select></label>;
+  return <label className="grid min-w-0 gap-2 text-sm font-bold text-slate-700"><span>{label}</span><select value={value} onChange={e => onChange(e.target.value)} className="h-12 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-base font-semibold outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100">{children}</select></label>;
 }
 
 function ToggleField({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
