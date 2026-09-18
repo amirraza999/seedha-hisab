@@ -6,6 +6,7 @@ import {
   HandCoins,
   House,
   Landmark,
+  Package,
   ReceiptText,
   Scale,
   Zap,
@@ -16,6 +17,7 @@ export type ToolSlug =
   | "freelancer-tax-calculator-pakistan"
   | "filer-vs-non-filer-calculator"
   | "cod-profit-calculator"
+  | "daraz-profit-calculator"
   | "profit-margin-calculator"
   | "marla-to-square-feet-calculator"
   | "electricity-bill-calculator-pakistan"
@@ -63,6 +65,16 @@ export const tools = [
     category: "Business",
     icon: ReceiptText,
     featured: true,
+  },
+  {
+    slug: "daraz-profit-calculator",
+    name: "Daraz Profit Calculator (FBM vs FBD)",
+    urdu: "دراز منافع کیلکولیٹر",
+    description:
+      "Compare Fulfilled-by-Merchant and Fulfilled-by-Daraz side by side to see which leaves more profit.",
+    category: "Business",
+    icon: Package,
+    featured: false,
   },
   {
     slug: "profit-margin-calculator",

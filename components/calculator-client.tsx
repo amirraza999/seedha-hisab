@@ -4,7 +4,8 @@ import { Children, useState } from "react";
 import { Copy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { codProfit, discountCalc, electricityEstimate, electricitySlabEstimate, freelancerTax, landConvert, marginCalc, propertyWithholding, requiredForMargin, salaryTax } from "@/lib/calculations";
+import { codProfit, darazFbdProfit, darazFbmProfit, discountCalc, electricityEstimate, electricitySlabEstimate, freelancerTax, landConvert, marginCalc, propertyWithholding, requiredForMargin, salaryTax } from "@/lib/calculations";
+import { darazCategories, darazProvinces, DARAZ_PAYMENT_FEE_PCT } from "@/lib/daraz-fees";
 import { discoTariffs, getDiscoTariff, tariffDataNote, type ConsumerCategory } from "@/lib/electricity-tariffs";
 import type { ToolSlug } from "@/lib/tools";
 
@@ -17,6 +18,10 @@ function Field({ label, value, onChange, suffix, hint }: { label: string; value:
 
 function SelectField({ label, value, onChange, children }: { label: string; value: string; onChange: (v: string) => void; children: React.ReactNode }) {
   return <label className="grid gap-2 text-sm font-bold text-slate-700"><span>{label}</span><select value={value} onChange={e => onChange(e.target.value)} className="h-12 rounded-xl border border-slate-300 bg-white px-3 text-base font-semibold outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100">{children}</select></label>;
+}
+
+function ToggleField({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return <label className="flex min-w-0 items-center gap-2 text-sm font-bold text-slate-700"><input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="h-4 w-4 shrink-0 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" /><span className="min-w-0">{label}</span></label>;
 }
 
 function WhatsAppIcon({ size = 16 }: { size?: number }) {
@@ -42,9 +47,9 @@ function Result({ title, primary, rows, formula, note }: { title: string; primar
 
 export function CalculatorClient({ slug }: { slug: ToolSlug }) {
   const [v, setV] = useState<Record<string,string>>({
-    salary: "200000", annual: "2400000", income: "2400000", property: "10000000", productCost: "1200", sellingPrice: "2500", orders: "100", deliveryRate: "70", courier: "220", returnCourier: "180", packaging: "70", codFee: "1", adSpend: "15000", overhead: "8000", cost: "1000", selling: "1500", desiredMargin: "30", land: "5", marlaStandard: "225", units: "250", unitRate: "34.47", fixed: "0", fca: "0", tax: "18", cash: "300000", bank: "600000", gold: "500000", silver: "0", investments: "200000", inventory: "0", receivables: "0", liabilities: "100000", nisab: "250000", deductions: "10000", price: "45000", discount1: "25", discount2: "0"
+    salary: "200000", annual: "2400000", income: "2400000", property: "10000000", productCost: "1200", sellingPrice: "2500", orders: "100", deliveryRate: "70", courier: "220", returnCourier: "180", packaging: "70", codFee: "1", adSpend: "15000", overhead: "8000", cost: "1000", selling: "1500", desiredMargin: "30", land: "5", marlaStandard: "225", units: "250", unitRate: "34.47", fixed: "0", fca: "0", tax: "18", cash: "300000", bank: "600000", gold: "500000", silver: "0", investments: "200000", inventory: "0", receivables: "0", liabilities: "100000", nisab: "250000", deductions: "10000", price: "45000", discount1: "25", discount2: "0", darazSp: "2000", darazPurchase: "900", darazExtra: "0", darazVoucherPct: "3", darazWeight: "500", darazPickPack: "60", darazStorage: "0"
   });
-  const [mode, setMode] = useState<Record<string,string>>({ incomePeriod: "monthly", pseB: "yes", atl: "yes", transaction: "purchase", landUnit: "marla", electricityMode: "manual", disco: "lesco", consumerCategory: "protected" });
+  const [mode, setMode] = useState<Record<string,string>>({ incomePeriod: "monthly", pseB: "yes", atl: "yes", transaction: "purchase", landUnit: "marla", electricityMode: "manual", disco: "lesco", consumerCategory: "protected", darazCategory: "18", darazProvince: "15", darazVoucherOn: "no", darazFsmOn: "no", darazHandlingMode: "dropoff", darazDeliveryType: "door", darazZone: "1" });
   const set = (key: string) => (value: string) => setV(s => ({...s, [key]: value}));
 
   if (slug === "salary-tax-calculator-pakistan" || slug === "net-salary-calculator-pakistan") {
@@ -67,6 +72,72 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
   if (slug === "cod-profit-calculator") {
     const r = codProfit({ productCost:num(v.productCost), sellingPrice:num(v.sellingPrice), orders:num(v.orders), deliveryRate:num(v.deliveryRate), courier:num(v.courier), returnCourier:num(v.returnCourier), packaging:num(v.packaging), codFee:num(v.codFee), adSpend:num(v.adSpend), overhead:num(v.overhead) });
     return <CalcShell><div className="grid gap-4 sm:grid-cols-2"><Field label="Product cost" value={v.productCost} onChange={set("productCost")} suffix="PKR"/><Field label="Selling price" value={v.sellingPrice} onChange={set("sellingPrice")} suffix="PKR"/><Field label="Orders" value={v.orders} onChange={set("orders")}/><Field label="Delivery rate" value={v.deliveryRate} onChange={set("deliveryRate")} suffix="%"/><Field label="Courier / delivered" value={v.courier} onChange={set("courier")} suffix="PKR"/><Field label="Return courier / RTO" value={v.returnCourier} onChange={set("returnCourier")} suffix="PKR"/><Field label="Packaging / order" value={v.packaging} onChange={set("packaging")} suffix="PKR"/><Field label="COD fee" value={v.codFee} onChange={set("codFee")} suffix="%"/><Field label="Total ad spend" value={v.adSpend} onChange={set("adSpend")} suffix="PKR"/><Field label="Allocated overhead" value={v.overhead} onChange={set("overhead")} suffix="PKR"/></div><Result title="Estimated net profit" primary={money(r.profit)} rows={[["Delivered / returned",`${r.delivered.toFixed(0)} / ${r.returned.toFixed(0)}`],["Gross delivered sales",money(r.sales)],["Total modeled cost",money(r.totalCost)],["Profit margin",`${r.margin.toFixed(1)}%`],["ROAS",`${r.roas.toFixed(2)}×`],["Break-even CPA",money(r.breakEvenCpa)]]} formula="Delivered sales − product, courier, RTO, packaging, COD, ads and overhead costs" /></CalcShell>;
+  }
+
+  if (slug === "daraz-profit-calculator") {
+    const shared = {
+      sellingPrice: num(v.darazSp), purchasePrice: num(v.darazPurchase), extraCharges: num(v.darazExtra),
+      commissionPercent: num(mode.darazCategory), paymentFeePercent: DARAZ_PAYMENT_FEE_PCT, vatPercent: num(mode.darazProvince),
+      voucherOn: mode.darazVoucherOn === "yes", voucherPercent: num(v.darazVoucherPct), freeShippingMaxOn: mode.darazFsmOn === "yes",
+    };
+    const fbm = darazFbmProfit({ ...shared, weightGrams: num(v.darazWeight), pickup: mode.darazHandlingMode === "pickup", deliveryType: mode.darazDeliveryType as "door" | "collection", zone: Number(mode.darazZone) as 1|2|3|4, pickPackFee: 0, storageFee: 0 });
+    const fbd = darazFbdProfit({ ...shared, weightGrams: 0, pickup: false, deliveryType: "door", zone: 1, pickPackFee: num(v.darazPickPack), storageFee: num(v.darazStorage) });
+    const winner = fbm.profit === fbd.profit ? "Both models leave the same profit" : fbm.profit > fbd.profit ? `FBM leaves ${money(fbm.profit - fbd.profit)} more profit` : `FBD leaves ${money(fbd.profit - fbm.profit)} more profit`;
+    const shareText = `Daraz FBM vs FBD (Rs ${v.darazSp} item)\nFBM net profit: ${money(fbm.profit)} (${fbm.margin.toFixed(1)}% margin)\nFBD net profit: ${money(fbd.profit)} (${fbd.margin.toFixed(1)}% margin)\n${winner}\nCalculated with Seedha Hisab`;
+    async function copy() { await navigator.clipboard?.writeText(shareText); }
+    async function share() { if (navigator.share) await navigator.share({ title: "Daraz FBM vs FBD", text: shareText }); else await copy(); }
+    function whatsapp() { window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank", "noopener,noreferrer"); }
+    return <div className="grid min-w-0 gap-5">
+      <div className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 sm:p-6">
+        <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <SelectField label="Category" value={mode.darazCategory} onChange={x=>setMode(s=>({...s,darazCategory:x}))}>{darazCategories.map(c=><option key={c.value} value={c.value}>{c.label}</option>)}</SelectField>
+          <Field label="Selling price" value={v.darazSp} onChange={set("darazSp")} suffix="PKR" />
+          <SelectField label="Province (VAT)" value={mode.darazProvince} onChange={x=>setMode(s=>({...s,darazProvince:x}))}>{darazProvinces.map(p=><option key={p.value} value={p.value}>{p.label}</option>)}</SelectField>
+          <Field label="Purchasing price" value={v.darazPurchase} onChange={set("darazPurchase")} suffix="PKR" />
+          <Field label="Extra charges (ads/packaging)" value={v.darazExtra} onChange={set("darazExtra")} suffix="PKR" />
+          <ToggleField label="Voucher Max" checked={mode.darazVoucherOn === "yes"} onChange={c=>setMode(s=>({...s,darazVoucherOn:c?"yes":"no"}))} />
+          {mode.darazVoucherOn === "yes" && <Field label="Voucher %" value={v.darazVoucherPct} onChange={set("darazVoucherPct")} suffix="%" />}
+          <ToggleField label="Free Shipping Max (6% of price, Rs 30–200)" checked={mode.darazFsmOn === "yes"} onChange={c=>setMode(s=>({...s,darazFsmOn:c?"yes":"no"}))} />
+        </div>
+      </div>
+      <div className="grid min-w-0 gap-4 md:grid-cols-2">
+        <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5">
+          <p className="text-xs font-extrabold uppercase tracking-[.12em] text-slate-500">FBM · Fulfilled by Merchant</p>
+          <div className="mt-4 grid gap-3">
+            <Field label="Weight" value={v.darazWeight} onChange={set("darazWeight")} suffix="grams" />
+            <SelectField label="Handling mode" value={mode.darazHandlingMode} onChange={x=>setMode(s=>({...s,darazHandlingMode:x}))}><option value="dropoff">Drop-off</option><option value="pickup">Pickup (rider collects)</option></SelectField>
+            <SelectField label="Delivery type" value={mode.darazDeliveryType} onChange={x=>setMode(s=>({...s,darazDeliveryType:x}))}><option value="door">Door-to-Door</option><option value="collection">Collection Point</option></SelectField>
+            <SelectField label="Shipping zone" value={mode.darazZone} onChange={x=>setMode(s=>({...s,darazZone:x}))}><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option><option value="4">Zone 4</option></SelectField>
+          </div>
+        </div>
+        <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5">
+          <p className="text-xs font-extrabold uppercase tracking-[.12em] text-slate-500">FBD · Fulfilled by Daraz</p>
+          <div className="mt-4 grid gap-3">
+            <Field label="Pick & Pack fee" value={v.darazPickPack} onChange={set("darazPickPack")} suffix="PKR" />
+            <Field label="Monthly storage fee" value={v.darazStorage} onChange={set("darazStorage")} suffix="PKR" hint="Only if stock sits longer than about 30 days." />
+          </div>
+        </div>
+      </div>
+      <div className="grid min-w-0 gap-4 md:grid-cols-2">
+        {[["FBM result", fbm, [["Commission",fbm.commissionAmount],["Payment fee",fbm.paymentFeeAmount],["Shipping fee",fbm.shippingFee],["Handling fee",fbm.handlingFee],["VAT",fbm.vatAmount]]] as const, ["FBD result", fbd, [["Commission",fbd.commissionAmount],["Payment fee",fbd.paymentFeeAmount],["Pick & Pack fee",fbd.pickPackFee],["Storage fee",fbd.storageFee],["VAT",fbd.vatAmount]]] as const].map(([title, r, lines]) => (
+          <section key={title} aria-live="polite" className="min-w-0 overflow-hidden rounded-2xl bg-[#102a43] text-white shadow-[0_18px_50px_rgba(15,42,67,.18)]">
+            <div className="border-b border-white/10 p-6">
+              <p className="text-xs font-extrabold uppercase tracking-[.16em] text-emerald-300">{title}</p>
+              <p className={`mt-2 text-3xl font-black tracking-tight sm:text-4xl ${r.profit < 0 ? "text-red-400" : ""}`}>{money(r.profit)}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-300">Margin {r.margin.toFixed(1)}% · ROI {r.roi.toFixed(1)}%</p>
+            </div>
+            <dl className="grid min-w-0 gap-px bg-white/10 sm:grid-cols-2">{lines.map(([label,value]) => <div key={label} className="min-w-0 bg-[#102a43] p-4"><dt className="text-xs font-semibold text-slate-400">− {label}</dt><dd className="mt-1 text-base font-bold">{money(value)}</dd></div>)}</dl>
+          </section>
+        ))}
+      </div>
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center font-bold text-emerald-900">{winner}</div>
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={copy} variant="secondary" className="rounded-xl"><Copy size={16} /> Copy result</Button>
+        <Button onClick={whatsapp} className="rounded-xl bg-[#25D366] text-[#06251c] hover:bg-[#1fbd5a]"><WhatsAppIcon /> WhatsApp</Button>
+        <Button onClick={share} className="rounded-xl bg-emerald-500 text-[#06251c] hover:bg-emerald-400"><Share2 size={16} /> Share</Button>
+      </div>
+      <p className="text-xs leading-5 text-slate-500">Category commission, payment fee and VAT are commonly reported estimates, not an official Daraz price list. Confirm exact rates in your Daraz Seller Center before pricing a product.</p>
+    </div>;
   }
 
   if (slug === "profit-margin-calculator") {

@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   codProfit,
+  darazFbdProfit,
+  darazFbmProfit,
   discountCalc,
   electricitySlabEstimate,
   freelancerTax,
@@ -68,6 +70,24 @@ test("electricity slab estimate never drops units beyond the last defined slab",
   ];
   const r = electricitySlabEstimate(250, cappedSlabs, 0, 0);
   assert.equal(r.energy, 100 * 10 + 100 * 13 + 50 * 13);
+});
+
+test("Daraz FBM vs FBD profit comparison on a fashion item", () => {
+  const input = {
+    sellingPrice: 2000, purchasePrice: 900, extraCharges: 0,
+    commissionPercent: 18, paymentFeePercent: 2.25, vatPercent: 15,
+    voucherOn: false, voucherPercent: 0, freeShippingMaxOn: false,
+    weightGrams: 500, pickup: false, deliveryType: "door", zone: 1,
+    pickPackFee: 60, storageFee: 0,
+  };
+  const fbm = darazFbmProfit(input);
+  assert.equal(fbm.shippingFee, 100);
+  assert.equal(fbm.handlingFee, 20);
+  assert.equal(fbm.vatAmount, 63.75);
+  assert.equal(fbm.profit, 511.25);
+  const fbd = darazFbdProfit(input);
+  assert.equal(fbd.vatAmount, 69.75);
+  assert.equal(fbd.profit, 565.25);
 });
 
 test("COD model accounts for delivered and returned orders", () => {

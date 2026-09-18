@@ -69,6 +69,18 @@ export const toolSeo: Record<ToolSlug, SeoCluster> = {
       "delivery rate profit calculator",
     ],
   },
+  "daraz-profit-calculator": {
+    title: "Daraz Profit Calculator — FBM vs FBD",
+    description:
+      "Compare Daraz Fulfilled-by-Merchant and Fulfilled-by-Daraz profit side by side — commission, payment fee, VAT, shipping, handling and pick & pack fees.",
+    keywords: [
+      "Daraz profit calculator",
+      "Daraz FBM vs FBD",
+      "Daraz seller fee calculator Pakistan",
+      "Daraz commission calculator",
+      "Daraz fulfilled by Daraz calculator",
+    ],
+  },
   "profit-margin-calculator": {
     title: "Profit Margin & Markup Calculator Pakistan",
     description:
