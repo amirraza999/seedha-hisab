@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Inter, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
+import { PwaRegister } from "@/components/pwa-register";
 import { coreKeywords, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 const gaId = process.env.NEXT_PUBLIC_GA_ID;
@@ -75,9 +76,20 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: SITE_NAME,
+  },
   ...(gscVerification
     ? { verification: { google: gscVerification } }
     : {}),
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#102a43",
 };
 
 export default function RootLayout({
@@ -89,6 +101,7 @@ export default function RootLayout({
     <html lang="en-PK" className={`${inter.variable} ${notoNastaliqUrdu.variable}`}>
       <body className="antialiased">
         {children}
+        <PwaRegister />
         {gaId && (
           <>
             <Script
