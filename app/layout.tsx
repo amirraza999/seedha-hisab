@@ -7,6 +7,7 @@ import { coreKeywords, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 const gaId = process.env.NEXT_PUBLIC_GA_ID;
 const gscVerification = process.env.NEXT_PUBLIC_GSC_VERIFICATION;
+const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID;
 
 const inter = Inter({
   subsets: ["latin"],
@@ -102,6 +103,14 @@ export default function RootLayout({
       <body className="antialiased">
         {children}
         <PwaRegister />
+        {adsenseId && (
+          <Script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        )}
         {gaId && (
           <>
             <Script

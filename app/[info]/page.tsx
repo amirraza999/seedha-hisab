@@ -126,7 +126,7 @@ const pages: Record<
       ],
       [
         "Cookies and ads",
-        "Advertising is disabled during development. If AdSense is enabled later, this policy and any required consent controls will be updated first.",
+        "This site uses Google AdSense to show ads. Google and its partners may use cookies or similar technologies to serve ads based on your prior visits to this or other websites. You can opt out of personalized advertising by visiting Google's Ads Settings (adssettings.google.com). Visitors in the EEA, UK and Switzerland are shown a consent choice before any personalized ads are served, as required by applicable law.",
       ],
       [
         "Contact form",
