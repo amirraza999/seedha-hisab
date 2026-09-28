@@ -153,6 +153,18 @@ export const toolSeo: Record<ToolSlug, SeoCluster> = {
       "double discount calculator",
     ],
   },
+  "sip-calculator": {
+    title: "SIP Calculator Pakistan",
+    description:
+      "Project the future value of a monthly mutual fund investment in PKR — see total invested versus wealth gained with the standard SIP formula.",
+    keywords: [
+      "SIP calculator Pakistan",
+      "mutual fund calculator Pakistan",
+      "monthly investment calculator",
+      "future value calculator PKR",
+      "systematic investment plan calculator",
+    ],
+  },
 };
 
 export const categorySeo: Record<string, SeoCluster> = {

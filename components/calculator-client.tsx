@@ -4,9 +4,9 @@ import { Children, useState } from "react";
 import { Copy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { codProfit, darazFbdProfit, darazFbmProfit, discountCalc, electricityEstimate, electricitySlabEstimate, freelancerTax, isBulkyItem, landConvert, marginCalc, propertyWithholding, requiredForMargin, salaryTax } from "@/lib/calculations";
+import { codProfit, darazFbdProfit, darazFbmProfit, discountCalc, electricityBill2026, electricityEstimate, freelancerTax, isBulkyItem, landConvert, marginCalc, propertyWithholding, requiredForMargin, salaryTax, sipFutureValue } from "@/lib/calculations";
 import { darazCategories, darazProvinces, DARAZ_PAYMENT_FEE_PCT, getDarazCategoryCommission } from "@/lib/daraz-fees";
-import { discoTariffs, getDiscoTariff, tariffDataNote, type ConsumerCategory } from "@/lib/electricity-tariffs";
+import { CITY_TO_DISCO, cities, DEFAULT_FCA_RATE_PER_UNIT, discoOptions, DISCO_NAMES } from "@/lib/electricity-tariffs";
 import type { ToolSlug } from "@/lib/tools";
 
 const money = (n: number) => `Rs ${Math.round(Number.isFinite(n) ? n : 0).toLocaleString("en-PK")}`;
@@ -28,13 +28,13 @@ function WhatsAppIcon({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.52 0-10 4.48-10 10 0 1.77.46 3.44 1.27 4.89L2 22l5.25-1.28A9.96 9.96 0 0 0 12.04 22c5.52 0 10-4.48 10-10s-4.48-10-10-10Zm0 18.13c-1.6 0-3.15-.43-4.5-1.24l-.32-.19-3.12.76.83-3.05-.21-.32a8.13 8.13 0 0 1-1.25-4.35c0-4.5 3.66-8.16 8.17-8.16 4.5 0 8.16 3.66 8.16 8.16 0 4.51-3.66 8.16-8.16 8.16Zm4.47-6.12c-.24-.12-1.44-.71-1.66-.79-.22-.08-.39-.12-.55.12-.16.24-.63.79-.78.95-.14.16-.29.18-.53.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.11-.11.24-.29.36-.43.12-.14.16-.24.24-.4.08-.16.04-.31-.02-.43-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.42-.55-.42-.14-.01-.31-.01-.47-.01-.16 0-.43.06-.65.31-.22.24-.86.84-.86 2.05s.88 2.38 1 2.54c.12.16 1.73 2.64 4.19 3.7.59.25 1.05.4 1.4.52.59.19 1.13.16 1.55.1.47-.07 1.44-.59 1.65-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z"/></svg>;
 }
 
-function Result({ title, primary, rows, formula, note }: { title: string; primary: string; rows: [string, string][]; formula?: string; note?: string }) {
+function Result({ title, primary, rows, formula, note, children }: { title: string; primary: string; rows: [string, string][]; formula?: string; note?: string; children?: React.ReactNode }) {
   const shareText = `${title}: ${primary}\n${rows.map(([a,b]) => `${a}: ${b}`).join("\n")}\nCalculated with Seedha Hisab`;
   async function copy() { await navigator.clipboard?.writeText(shareText); }
   async function share() { if (navigator.share) await navigator.share({ title, text: shareText }); else await copy(); }
   function whatsapp() { window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank", "noopener,noreferrer"); }
   return <section aria-live="polite" className="overflow-hidden rounded-2xl bg-[#102a43] text-white shadow-[0_18px_50px_rgba(15,42,67,.18)]">
-    <div className="border-b border-white/10 p-6"><p className="text-xs font-extrabold uppercase tracking-[.16em] text-emerald-300">{title}</p><p className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">{primary}</p>{note && <p className="mt-3 text-sm leading-6 text-slate-300">{note}</p>}</div>
+    <div className="border-b border-white/10 p-6"><p className="text-xs font-extrabold uppercase tracking-[.16em] text-emerald-300">{title}</p><p className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">{primary}</p>{note && <p className="mt-3 text-sm leading-6 text-slate-300">{note}</p>}{children && <div className="mt-4">{children}</div>}</div>
     <dl className="grid gap-px bg-white/10 sm:grid-cols-2">{rows.map(([label,value]) => <div key={label} className="bg-[#102a43] p-4"><dt className="text-xs font-semibold text-slate-400">{label}</dt><dd className="mt-1 text-base font-bold">{value}</dd></div>)}</dl>
     {formula && <div className="border-t border-white/10 px-6 py-4 text-sm text-slate-300"><strong className="text-white">Formula: </strong>{formula}</div>}
     <div className="flex flex-wrap gap-2 border-t border-white/10 p-4">
@@ -47,9 +47,9 @@ function Result({ title, primary, rows, formula, note }: { title: string; primar
 
 export function CalculatorClient({ slug }: { slug: ToolSlug }) {
   const [v, setV] = useState<Record<string,string>>({
-    salary: "200000", annual: "2400000", income: "2400000", property: "10000000", productCost: "1200", sellingPrice: "2500", orders: "100", deliveryRate: "70", courier: "220", returnCourier: "180", packaging: "70", codFee: "1", adSpend: "15000", overhead: "8000", cost: "1000", selling: "1500", desiredMargin: "30", land: "5", marlaStandard: "225", units: "250", unitRate: "34.47", fixed: "0", fca: "0", tax: "18", cash: "300000", bank: "600000", gold: "500000", silver: "0", investments: "200000", inventory: "0", receivables: "0", liabilities: "100000", nisab: "250000", deductions: "10000", price: "45000", discount1: "25", discount2: "0", darazSp: "2000", darazPurchase: "900", darazExtra: "0", darazPenalties: "0", darazVoucherPct: "3", darazWeight: "500", darazPickPack: "60", darazStorage: "0"
+    salary: "200000", annual: "2400000", income: "2400000", property: "10000000", productCost: "1200", sellingPrice: "2500", orders: "100", deliveryRate: "70", courier: "220", returnCourier: "180", packaging: "70", codFee: "1", adSpend: "15000", overhead: "8000", cost: "1000", selling: "1500", desiredMargin: "30", land: "5", marlaStandard: "225", units: "250", unitRate: "34.47", fixed: "0", fca: "0", tax: "18", cash: "300000", bank: "600000", gold: "500000", silver: "0", investments: "200000", inventory: "0", receivables: "0", liabilities: "100000", nisab: "250000", deductions: "10000", price: "45000", discount1: "25", discount2: "0", darazSp: "2000", darazPurchase: "900", darazExtra: "0", darazPenalties: "0", darazVoucherPct: "3", darazWeight: "500", darazPickPack: "60", darazStorage: "0", elecFca: String(DEFAULT_FCA_RATE_PER_UNIT), sipAmount: "10000", sipRate: "15", sipYears: "10"
   });
-  const [mode, setMode] = useState<Record<string,string>>({ incomePeriod: "monthly", pseB: "yes", atl: "yes", transaction: "purchase", landUnit: "marla", electricityMode: "manual", disco: "lesco", consumerCategory: "protected", darazCategory: "fashion", darazProvince: "15", darazVoucherOn: "no", darazFsmOn: "no", darazHandlingMode: "dropoff", darazDeliveryType: "door", darazZone: "1" });
+  const [mode, setMode] = useState<Record<string,string>>({ incomePeriod: "monthly", pseB: "yes", atl: "yes", transaction: "purchase", landUnit: "marla", electricityMode: "disco", elecCity: "karachi", elecDisco: "ke", elecStatus: "protected", elecGst: "yes", elecPtv: "yes", darazCategory: "fashion", darazProvince: "15", darazVoucherOn: "no", darazFsmOn: "no", darazHandlingMode: "dropoff", darazDeliveryType: "door", darazZone: "1" });
   const set = (key: string) => (value: string) => setV(s => ({...s, [key]: value}));
 
   if (slug === "salary-tax-calculator-pakistan" || slug === "net-salary-calculator-pakistan") {
@@ -159,21 +159,40 @@ export function CalculatorClient({ slug }: { slug: ToolSlug }) {
 
   if (slug === "electricity-bill-calculator-pakistan") {
     if (mode.electricityMode === "disco") {
-      const disco = getDiscoTariff(mode.disco) ?? discoTariffs[0];
-      const category = disco.categories[mode.consumerCategory as ConsumerCategory] ?? disco.categories.protected;
-      const r = electricitySlabEstimate(num(v.units), category.slabs, category.fixedCharge, num(v.tax));
+      const discoSlug = mode.elecCity === "other" ? mode.elecDisco : (CITY_TO_DISCO[mode.elecCity] ?? "lesco");
+      const discoName = DISCO_NAMES[discoSlug] ?? "your DISCO";
+      const r = electricityBill2026({ units: num(v.units), status: mode.elecStatus as "protected" | "unprotected", fcaRatePerUnit: num(v.elecFca), includeGst: mode.elecGst === "yes", includePtv: mode.elecPtv === "yes" });
       return <CalcShell>
-        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">⚠️ Draft feature — {tariffDataNote}</div>
-        <SelectField label="Distribution company (DISCO)" value={mode.disco} onChange={x=>setMode(s=>({...s,disco:x}))}>{discoTariffs.map(d=><option key={d.slug} value={d.slug}>{d.name}</option>)}</SelectField>
-        <SelectField label="Consumer category" value={mode.consumerCategory} onChange={x=>setMode(s=>({...s,consumerCategory:x}))}><option value="lifeline">{disco.categories.lifeline.label}</option><option value="protected">{disco.categories.protected.label}</option><option value="unprotected">{disco.categories.unprotected.label}</option></SelectField>
-        <Field label="Units consumed" value={v.units} onChange={set("units")} suffix="kWh"/>
-        <Field label="Combined tax estimate" value={v.tax} onChange={set("tax")} suffix="%"/>
-        <Result title="Estimated electricity bill (draft)" primary={money(r.total)} rows={[["Energy charges",money(r.energy)],["Fixed charge",money(r.fixedCharge)],["Modeled taxes",money(r.taxes)],["Slabs applied",`${r.breakdown.length}`]]} formula="Sum of (units in each slab × slab rate) + fixed charge, then taxes" note="Draft DISCO rates — not yet verified. Switch to Manual Rate mode for a trustworthy estimate today." /></CalcShell>;
+        <SelectField label="Rate mode" value={mode.electricityMode} onChange={x=>setMode(s=>({...s,electricityMode:x}))}><option value="disco">By DISCO (2026 NEPRA rates)</option><option value="manual">Manual rate (I have my own tariff)</option></SelectField>
+        <SelectField label="Your city" value={mode.elecCity} onChange={x=>setMode(s=>({...s,elecCity:x}))}>{cities.map(c=><option key={c.value} value={c.value}>{c.label}</option>)}</SelectField>
+        {mode.elecCity === "other" && <SelectField label="Your DISCO" value={mode.elecDisco} onChange={x=>setMode(s=>({...s,elecDisco:x}))}>{discoOptions.map(d=><option key={d.value} value={d.value}>{d.label}</option>)}</SelectField>}
+        <Field label="Units consumed this month" value={v.units} onChange={set("units")} suffix="kWh" hint="Find this on your last bill as &quot;Units Consumed&quot;." />
+        <SelectField label="Connection status" value={mode.elecStatus} onChange={x=>setMode(s=>({...s,elecStatus:x}))}><option value="protected">Protected (avg. up to 200 units)</option><option value="unprotected">Non-Protected</option></SelectField>
+        <Field label="FCA / QTA adjustment" value={v.elecFca} onChange={set("elecFca")} suffix="Rs/unit" hint="Default is the NEPRA-notified July 2026 rate. Check your latest bill's FCA line for accuracy." />
+        <ToggleField label="Include GST (18%)" checked={mode.elecGst === "yes"} onChange={c=>setMode(s=>({...s,elecGst:c?"yes":"no"}))} />
+        <ToggleField label="Include PTV fee (Rs 35)" checked={mode.elecPtv === "yes"} onChange={c=>setMode(s=>({...s,elecPtv:c?"yes":"no"}))} />
+        <Result title="Estimated electricity bill" primary={money(r.total)} rows={[["Energy charges",money(r.energy)],["Fixed charges",money(r.fixed)],["FCA / QTA",money(r.fca)],["GST",money(r.gst)],["PTV fee",money(r.ptv)]]} formula="Energy (slab method) + fixed charges + FCA, then GST and PTV fee" note={`${discoName} — ${r.slabNote}`} /></CalcShell>;
     }
     const r = electricityEstimate(num(v.units),num(v.unitRate),num(v.fixed),num(v.fca),num(v.tax));
     return <CalcShell>
-      <SelectField label="Rate mode" value={mode.electricityMode} onChange={x=>setMode(s=>({...s,electricityMode:x}))}><option value="manual">Manual rate (recommended — accurate today)</option><option value="disco">By DISCO (draft — pending verification)</option></SelectField>
-      <div className="grid gap-4 sm:grid-cols-2"><Field label="Units consumed" value={v.units} onChange={set("units")} suffix="kWh"/><Field label="Applicable average tariff" value={v.unitRate} onChange={set("unitRate")} suffix="Rs/unit" hint="Enter the rate shown for your category; tariffs change."/><Field label="Fixed charges" value={v.fixed} onChange={set("fixed")} suffix="PKR"/><Field label="FCA / other adjustments" value={v.fca} onChange={set("fca")} suffix="PKR"/><Field label="Combined tax estimate" value={v.tax} onChange={set("tax")} suffix="%"/></div><Result title="Estimated electricity bill" primary={money(r.total)} rows={[["Energy charges",money(r.energy)],["Before tax",money(r.subtotal)],["Modeled taxes",money(r.taxes)],["Actual bill may differ","Arrears, meter factors & monthly adjustments"]]} formula="(Units × chosen tariff + fixed charges + adjustments) × taxes" note="Transparent manual-rate estimator. It does not claim a single nationwide tariff." /></CalcShell>;
+      <SelectField label="Rate mode" value={mode.electricityMode} onChange={x=>setMode(s=>({...s,electricityMode:x}))}><option value="disco">By DISCO (2026 NEPRA rates)</option><option value="manual">Manual rate (I have my own tariff)</option></SelectField>
+      <div className="grid gap-4 sm:grid-cols-2"><Field label="Units consumed" value={v.units} onChange={set("units")} suffix="kWh"/><Field label="Applicable average tariff" value={v.unitRate} onChange={set("unitRate")} suffix="Rs/unit" hint="Enter the rate shown for your category; tariffs change."/><Field label="Fixed charges" value={v.fixed} onChange={set("fixed")} suffix="PKR"/><Field label="FCA / other adjustments" value={v.fca} onChange={set("fca")} suffix="PKR"/><Field label="Combined tax estimate" value={v.tax} onChange={set("tax")} suffix="%"/></div><Result title="Estimated electricity bill" primary={money(r.total)} rows={[["Energy charges",money(r.energy)],["Before tax",money(r.subtotal)],["Modeled taxes",money(r.taxes)],["Actual bill may differ","Arrears, meter factors & monthly adjustments"]]} formula="(Units × chosen tariff + fixed charges + adjustments) × taxes" note="Use this if you already know your exact billed rate for your category." /></CalcShell>;
+  }
+
+  if (slug === "sip-calculator") {
+    const r = sipFutureValue(num(v.sipAmount), num(v.sipRate), num(v.sipYears));
+    const investedPct = r.futureValue > 0 ? Math.max(2, Math.min(98, (r.invested / r.futureValue) * 100)) : 50;
+    return <CalcShell>
+      <Field label="Monthly investment" value={v.sipAmount} onChange={set("sipAmount")} suffix="PKR" />
+      <Field label="Expected annual return" value={v.sipRate} onChange={set("sipRate")} suffix="%" hint="Check the fund's actual historical average — don't guess optimistically." />
+      <Field label="Investment duration" value={v.sipYears} onChange={set("sipYears")} suffix="years" />
+      <Result title="Projected future value" primary={money(r.futureValue)} rows={[["Total invested",money(r.invested)],["Wealth gained",money(r.gained)],["Monthly amount",money(num(v.sipAmount))],["Duration",`${v.sipYears} years`]]} formula="FV = P × [(1+i)ⁿ − 1] / i × (1+i), where i = annual rate ÷ 12" note="Educational estimate only — not investment advice. Excludes fund fees, exit load and tax; actual returns are not guaranteed.">
+        <div className="mt-1">
+          <div className="h-3 w-full overflow-hidden rounded-full bg-white/10"><div className="flex h-full"><div className="h-full bg-slate-400" style={{width:`${investedPct}%`}} /><div className="h-full bg-amber-400" style={{width:`${100-investedPct}%`}} /></div></div>
+          <div className="mt-2 flex gap-4 text-xs text-slate-300"><span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-slate-400" /> Invested</span><span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-amber-400" /> Gained</span></div>
+        </div>
+      </Result>
+    </CalcShell>;
   }
 
   if (slug === "zakat-calculator-pakistan") {

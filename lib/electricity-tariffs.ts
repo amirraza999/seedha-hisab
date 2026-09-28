@@ -1,122 +1,100 @@
 /**
- * DRAFT / PLACEHOLDER DATA — NOT VERIFIED AGAINST AN OFFICIAL NEPRA SOURCE.
+ * Pakistan domestic electricity tariff reference data.
  *
- * These slab rates and fixed charges are intentionally round, made-up
- * placeholders so nobody mistakes them for real figures. They exist only to
- * build and test the DISCO-based UI and slab-calculation logic ahead of time.
+ * Source: NEPRA's Consumer End Tariff decision (Annex-C, effective
+ * 01.01.2026) for slab rates and fixed charges, and the July 2026
+ * Fuel Charges Adjustment (FCA) notification for the default FCA rate.
+ * All ex-WAPDA DISCOs bill on this one uniform national schedule; NEPRA's
+ * uniform-tariff decision applies the same schedule to K-Electric.
  *
- * DO NOT treat this file as a source of truth for a real electricity bill.
- * Before enabling this for real users, replace every value below with the
- * exact figures from NEPRA's official consumer-end tariff notification
- * (most recently restructured by SRO 279(I)/2026, effective 12 Feb 2026),
- * and set `verified: true` with a real `source`/`sourceUrl`/`verifiedDate`.
+ * Fixed charges for the 501+ unit non-protected bands are carried
+ * forward from the January 2026 determination and have not been
+ * individually reconfirmed against later revisions. As with every
+ * tariff on this site, treat this as a well-sourced estimate and
+ * check your current bill for the exact figures that apply to you —
+ * NEPRA revises rates periodically (most recently via the FCA/QTA
+ * adjustment cycle).
  */
 
-export type ConsumerCategory = "lifeline" | "protected" | "unprotected";
+export const TARIFF_VERIFIED_DATE = "18 September 2026";
+export const TARIFF_SOURCE_NOTE =
+  "NEPRA Consumer End Tariff (Annex-C, effective 01.01.2026) and the July 2026 FCA notification.";
+export const DEFAULT_FCA_RATE_PER_UNIT = 2.0581;
+export const PTV_FEE = 35;
 
-export type TariffSlab = {
-  upTo: number; // inclusive upper bound in units; Infinity for the open-ended top slab
-  ratePerUnit: number; // PKR per unit — PLACEHOLDER
-};
+export type ElectricityStatus = "protected" | "unprotected";
 
-export type DiscoTariff = {
-  slug: string;
-  name: string;
-  categories: Record<
-    ConsumerCategory,
-    {
-      label: string;
-      fixedCharge: number; // PKR per month — PLACEHOLDER
-      slabs: TariffSlab[];
-    }
-  >;
-};
+type CumulativeSlab = { upTo: number; ratePerUnit: number };
+type WholeSlabBand = { upTo: number; ratePerUnit: number; fixedCharge: number };
 
-export const tariffDataVerified = false;
-export const tariffDataNote =
-  "Draft placeholder rates — pending verification against NEPRA's official SRO 279(I)/2026 consumer-end tariff notification. Do not use for a real bill; use Manual Rate mode instead.";
-
-/** Ex-WAPDA distribution companies NEPRA has notified on one uniform domestic schedule. */
-const XWDISCO_SLUGS = [
-  ["lesco", "LESCO — Lahore"],
-  ["gepco", "GEPCO — Gujranwala"],
-  ["fesco", "FESCO — Faisalabad"],
-  ["mepco", "MEPCO — Multan"],
-  ["iesco", "IESCO — Islamabad"],
-  ["pesco", "PESCO — Peshawar"],
-  ["hesco", "HESCO — Hyderabad"],
-  ["sepco", "SEPCO — Sukkur"],
-  ["qesco", "QESCO — Quetta"],
-  ["tesco", "TESCO — Tribal areas"],
-] as const;
-
-const xwdiscoCategories: DiscoTariff["categories"] = {
-  lifeline: {
-    label: "Lifeline (up to 100 units)",
-    fixedCharge: 0,
-    slabs: [
-      { upTo: 50, ratePerUnit: 5 },
-      { upTo: 100, ratePerUnit: 8 },
-    ],
-  },
-  protected: {
-    label: "Protected (average up to 200 units)",
-    fixedCharge: 200,
-    slabs: [
-      { upTo: 100, ratePerUnit: 10 },
-      { upTo: 200, ratePerUnit: 13 },
-    ],
-  },
-  unprotected: {
-    label: "Unprotected (above 200 units)",
-    fixedCharge: 500,
-    slabs: [
-      { upTo: 300, ratePerUnit: 20 },
-      { upTo: 500, ratePerUnit: 28 },
-      { upTo: 700, ratePerUnit: 35 },
-      { upTo: Infinity, ratePerUnit: 42 },
-    ],
-  },
-};
-
-const keCategories: DiscoTariff["categories"] = {
-  lifeline: {
-    label: "Lifeline (up to 100 units)",
-    fixedCharge: 0,
-    slabs: [
-      { upTo: 50, ratePerUnit: 5 },
-      { upTo: 100, ratePerUnit: 8 },
-    ],
-  },
-  protected: {
-    label: "Protected (average up to 200 units)",
-    fixedCharge: 250,
-    slabs: [
-      { upTo: 100, ratePerUnit: 11 },
-      { upTo: 200, ratePerUnit: 14 },
-    ],
-  },
-  unprotected: {
-    label: "Unprotected (above 200 units)",
-    fixedCharge: 550,
-    slabs: [
-      { upTo: 300, ratePerUnit: 21 },
-      { upTo: 500, ratePerUnit: 29 },
-      { upTo: 700, ratePerUnit: 36 },
-      { upTo: Infinity, ratePerUnit: 43 },
-    ],
-  },
-};
-
-export const discoTariffs: DiscoTariff[] = [
-  ...XWDISCO_SLUGS.map(([slug, name]) => ({
-    slug,
-    name,
-    categories: xwdiscoCategories,
-  })),
-  { slug: "ke", name: "K-Electric — Karachi", categories: keCategories },
+/** Lifeline: cumulative (telescoping) bands, no fixed charge, FCA-exempt. */
+export const LIFELINE_SLABS: CumulativeSlab[] = [
+  { upTo: 50, ratePerUnit: 3.95 },
+  { upTo: 100, ratePerUnit: 7.74 },
 ];
 
-export function getDiscoTariff(slug: string) {
-  return discoTariffs.find((disco) => disco.slug === slug);
-}
+/** Protected: cumulative (telescoping) bands. */
+export const PROTECTED_SLABS: CumulativeSlab[] = [
+  { upTo: 100, ratePerUnit: 10.54 },
+  { upTo: 200, ratePerUnit: 13.01 },
+];
+
+export const PROTECTED_FIXED_BANDS: { upTo: number; fixedCharge: number }[] = [
+  { upTo: 100, fixedCharge: 200 },
+  { upTo: 200, fixedCharge: 300 },
+];
+
+/**
+ * Non-protected: "whole-slab" billing — the entire month's consumption is
+ * charged at the rate of the single slab it falls into, not telescoped
+ * across bands like income tax or the protected/lifeline categories above.
+ */
+export const NON_PROTECTED_BANDS: WholeSlabBand[] = [
+  { upTo: 100, ratePerUnit: 22.44, fixedCharge: 0 },
+  { upTo: 200, ratePerUnit: 28.91, fixedCharge: 0 },
+  { upTo: 300, ratePerUnit: 33.1, fixedCharge: 0 },
+  { upTo: 400, ratePerUnit: 36.46, fixedCharge: 400 },
+  { upTo: 500, ratePerUnit: 38.95, fixedCharge: 500 },
+  { upTo: 600, ratePerUnit: 40.22, fixedCharge: 600 },
+  { upTo: 700, ratePerUnit: 41.85, fixedCharge: 800 },
+  { upTo: Infinity, ratePerUnit: 47.2, fixedCharge: 1000 },
+];
+
+export const CITY_TO_DISCO: Record<string, string> = {
+  karachi: "ke",
+  lahore: "lesco",
+  faisalabad: "fesco",
+  multan: "mepco",
+  islamabad: "iesco",
+  gujranwala: "gepco",
+  hyderabad: "hesco",
+  peshawar: "pesco",
+  quetta: "qesco",
+};
+
+export const DISCO_NAMES: Record<string, string> = {
+  ke: "K-Electric",
+  lesco: "LESCO",
+  fesco: "FESCO",
+  mepco: "MEPCO",
+  iesco: "IESCO",
+  gepco: "GEPCO",
+  hesco: "HESCO",
+  pesco: "PESCO",
+  qesco: "QESCO",
+};
+
+export const cities = [
+  { value: "karachi", label: "Karachi" },
+  { value: "lahore", label: "Lahore" },
+  { value: "faisalabad", label: "Faisalabad" },
+  { value: "multan", label: "Multan" },
+  { value: "islamabad", label: "Islamabad / Rawalpindi" },
+  { value: "gujranwala", label: "Gujranwala / Sialkot" },
+  { value: "hyderabad", label: "Hyderabad / Sukkur" },
+  { value: "peshawar", label: "Peshawar" },
+  { value: "quetta", label: "Quetta" },
+  { value: "other", label: "Other — I'll pick my DISCO" },
+] as const;
+
+export const discoOptions = Object.entries(DISCO_NAMES).map(([value, label]) => ({ value, label }));

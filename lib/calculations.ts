@@ -1,3 +1,5 @@
+import { LIFELINE_SLABS, NON_PROTECTED_BANDS, PROTECTED_FIXED_BANDS, PROTECTED_SLABS } from "./electricity-tariffs.ts";
+
 export type SalaryTaxResult = { annualIncome: number; annualTax: number; monthlyTax: number; annualTakeHome: number; monthlyTakeHome: number; effectiveRate: number; marginalRate: number; bracket: string };
 
 export const salaryTax2026 = {
@@ -117,6 +119,63 @@ export function electricitySlabEstimate(units: number, slabs: { upTo: number; ra
   const subtotal = energy + Math.max(0, fixedCharge);
   const taxes = subtotal * percent(taxPercent) / 100;
   return { energy, fixedCharge: Math.max(0, fixedCharge), subtotal, taxes, total: subtotal + taxes, breakdown };
+}
+
+export type ElectricityBill2026Input = {
+  units: number;
+  status: "protected" | "unprotected";
+  fcaRatePerUnit: number;
+  includeGst: boolean;
+  includePtv: boolean;
+};
+
+/**
+ * Pakistan domestic electricity bill using NEPRA's 2026 consumer-end tariff:
+ * lifeline/protected are billed cumulatively (telescoping) across their
+ * sub-bands; non-protected is billed "whole-slab" — the entire month's
+ * consumption at the single rate of the slab it falls into.
+ */
+export function electricityBill2026(input: ElectricityBill2026Input) {
+  const units = Math.max(0, input.units);
+  const isLifeline = input.status === "protected" && units <= 100;
+  let energy = 0;
+  let fixed = 0;
+  let slabNote = "";
+
+  if (input.status === "protected") {
+    if (isLifeline) {
+      energy = electricitySlabEstimate(units, LIFELINE_SLABS, 0, 0).energy;
+      fixed = 0;
+      slabNote = "Lifeline: billed cumulatively across sub-bands.";
+    } else {
+      energy = electricitySlabEstimate(units, PROTECTED_SLABS, 0, 0).energy;
+      const band = PROTECTED_FIXED_BANDS.find((b) => units <= b.upTo) ?? PROTECTED_FIXED_BANDS[PROTECTED_FIXED_BANDS.length - 1];
+      fixed = band.fixedCharge;
+      slabNote = "Protected: billed cumulatively across sub-bands.";
+    }
+  } else {
+    const band = NON_PROTECTED_BANDS.find((b) => units <= b.upTo) ?? NON_PROTECTED_BANDS[NON_PROTECTED_BANDS.length - 1];
+    energy = units * band.ratePerUnit;
+    fixed = band.fixedCharge;
+    slabNote = `Non-protected: entire ${units} units billed at Rs ${band.ratePerUnit}/unit (whole-slab method).`;
+  }
+
+  const fca = isLifeline ? 0 : units * Math.max(0, input.fcaRatePerUnit);
+  const subtotal = energy + fixed + fca;
+  const gst = input.includeGst ? subtotal * 0.18 : 0;
+  const ptv = input.includePtv ? 35 : 0;
+  const total = subtotal + gst + ptv;
+  return { energy, fixed, fca, gst, ptv, total, isLifeline, slabNote };
+}
+
+export function sipFutureValue(monthlyAmount: number, annualRatePercent: number, years: number) {
+  const p = Math.max(0, monthlyAmount);
+  const n = Math.max(0, Math.round(years * 12));
+  const i = Math.max(0, annualRatePercent) / 100 / 12;
+  const futureValue = i === 0 ? p * n : p * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+  const invested = p * n;
+  const gained = futureValue - invested;
+  return { invested, gained, futureValue };
 }
 
 export function zakatCalc(assets: number[], liabilities: number, nisab: number) {

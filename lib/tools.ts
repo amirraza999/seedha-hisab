@@ -9,6 +9,7 @@ import {
   Package,
   ReceiptText,
   Scale,
+  TrendingUp,
   Zap,
 } from "lucide-react";
 
@@ -23,7 +24,8 @@ export type ToolSlug =
   | "electricity-bill-calculator-pakistan"
   | "zakat-calculator-pakistan"
   | "net-salary-calculator-pakistan"
-  | "discount-calculator";
+  | "discount-calculator"
+  | "sip-calculator";
 
 export const tools = [
   {
@@ -134,6 +136,16 @@ export const tools = [
       "Find the discount amount and final price, including sequential discounts.",
     category: "Personal Finance",
     icon: Calculator,
+    featured: false,
+  },
+  {
+    slug: "sip-calculator",
+    name: "SIP Calculator",
+    urdu: "ایس آئی پی کیلکولیٹر",
+    description:
+      "Project what a monthly mutual fund investment could grow into over time.",
+    category: "Personal Finance",
+    icon: TrendingUp,
     featured: false,
   },
 ] as const;

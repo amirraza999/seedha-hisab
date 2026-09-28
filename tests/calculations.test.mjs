@@ -5,12 +5,14 @@ import {
   darazFbdProfit,
   darazFbmProfit,
   discountCalc,
+  electricityBill2026,
   electricitySlabEstimate,
   freelancerTax,
   landConvert,
   marginCalc,
   propertyWithholding,
   salaryTax,
+  sipFutureValue,
 } from "../lib/calculations.ts";
 
 test("salary tax is continuous at every 2026-27 slab boundary", () => {
@@ -137,4 +139,33 @@ test("COD model accounts for delivered and returned orders", () => {
   assert.equal(result.returned, 30);
   assert.equal(result.sales, 140_000);
   assert.equal(result.profit, 20_700);
+});
+
+test("electricity 2026: lifeline units are billed cumulatively and are FCA-exempt", () => {
+  const r = electricityBill2026({ units: 80, status: "protected", fcaRatePerUnit: 2.0581, includeGst: false, includePtv: false });
+  assert.equal(r.isLifeline, true);
+  assert.equal(r.energy, 50 * 3.95 + 30 * 7.74);
+  assert.equal(r.fca, 0);
+  assert.equal(r.fixed, 0);
+});
+
+test("electricity 2026: protected units above 100 use the protected cumulative bands and fixed charge", () => {
+  const r = electricityBill2026({ units: 250, status: "protected", fcaRatePerUnit: 2.0581, includeGst: true, includePtv: true });
+  assert.equal(r.isLifeline, false);
+  assert.equal(r.energy, 100 * 10.54 + 150 * 13.01);
+  assert.equal(r.fixed, 300);
+  assert.ok(Math.abs(r.total - 4542.6295) < 1e-6);
+});
+
+test("electricity 2026: non-protected bills the whole month at one slab rate", () => {
+  const r = electricityBill2026({ units: 350, status: "unprotected", fcaRatePerUnit: 2.0581, includeGst: false, includePtv: false });
+  assert.equal(r.energy, 350 * 36.46);
+  assert.equal(r.fixed, 400);
+});
+
+test("SIP future value matches the standard monthly compounding formula", () => {
+  const r = sipFutureValue(10_000, 15, 10);
+  assert.equal(r.invested, 1_200_000);
+  assert.ok(Math.abs(r.futureValue - 2_786_572.71544077) < 1e-4);
+  assert.ok(Math.abs(r.gained - (r.futureValue - r.invested)) < 1e-9);
 });
