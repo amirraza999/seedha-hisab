@@ -5,7 +5,7 @@ import { ArrowRight, CalendarCheck, ExternalLink, Info } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CalculatorClient } from "@/components/calculator-client";
-import { getTool, tools, type ToolSlug } from "@/lib/tools";
+import { categorySlug, getTool, tools, type ToolSlug } from "@/lib/tools";
 import { toolContent } from "@/lib/tool-content";
 import { getGuidesByTool } from "@/lib/guides";
 import { toolRedirects } from "@/lib/redirects";
@@ -107,38 +107,62 @@ export default async function ToolPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       <SiteHeader />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
-        <nav className="text-sm text-slate-500" aria-label="Breadcrumb">
+      <main className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8">
+        <nav className="text-xs text-slate-500 sm:text-sm" aria-label="Breadcrumb">
           <Link href="/">Home</Link>
           <span className="mx-2">/</span>
-          <Link href="/tools">{tool.category}</Link>
+          <Link href={`/tools#${categorySlug(tool.category)}`}>
+            {tool.category}
+          </Link>
           <span className="mx-2">/</span>
           <span className="text-slate-800">{tool.name}</span>
         </nav>
-        <div className="mt-8 flex flex-col justify-between gap-5 border-b border-slate-200 pb-8 lg:flex-row lg:items-end">
+        <div className="mt-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
-            <p className="eyebrow">{tool.category}</p>
-            <h1 className="mt-2 text-3xl font-black tracking-[-.035em] text-[#102a43] sm:text-5xl">
+            <h1 className="text-2xl font-black tracking-[-.03em] text-[#102a43] sm:text-4xl">
               {tool.name}
             </h1>
-            <p
-              className="mt-2 w-fit font-urdu text-lg leading-8 text-slate-500"
-              dir="auto"
-            >
-              {tool.urdu}
-            </p>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
-              {d.answer}
+            <p className="mt-1 text-sm leading-6 text-slate-600 sm:text-base">
+              <span className="font-urdu text-slate-500" dir="auto">
+                {tool.urdu}
+              </span>
+              <span className="mx-2 text-slate-300">·</span>
+              {tool.description}
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-bold text-emerald-900">
-            <CalendarCheck size={17} /> Verified {d.verified}
+          <div className="flex w-fit shrink-0 items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-900">
+            <CalendarCheck size={14} /> Verified {d.verified}
           </div>
         </div>
-        <section className="py-8">
+        <nav
+          aria-label="Switch calculator"
+          className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0"
+        >
+          {tools.map((t) => (
+            <Link
+              key={t.slug}
+              href={`/tools/${t.slug}`}
+              aria-current={t.slug === tool.slug ? "page" : undefined}
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold ${
+                t.slug === tool.slug
+                  ? "border-[#102a43] bg-[#102a43] text-white"
+                  : "border-slate-200 bg-white text-[#102a43] hover:border-emerald-400 hover:text-[#087f5b]"
+              }`}
+            >
+              {t.name.replace(" Calculator Pakistan", "").replace(" Calculator", "")}
+            </Link>
+          ))}
+        </nav>
+        <section className="py-5 sm:py-6">
           <CalculatorClient slug={slug as ToolSlug} />
         </section>
-        <section className="grid gap-6 border-t border-slate-200 py-12 lg:grid-cols-3">
+        <section className="border-t border-slate-200 pt-10">
+          <p className="eyebrow">The short answer</p>
+          <p className="mt-3 max-w-3xl text-lg leading-8 text-slate-600">
+            {d.answer}
+          </p>
+        </section>
+        <section className="grid gap-6 py-10 lg:grid-cols-3">
           <div className="info-card">
             <h2>How it works</h2>
             <p>{d.formula}</p>

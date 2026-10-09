@@ -163,3 +163,27 @@ export const categories = [
   "Property",
   "Personal Finance",
 ] as const;
+
+export type Category = (typeof categories)[number];
+
+export function categorySlug(category: string) {
+  return category.toLowerCase().replace(/ & /g, "-").replace(/\s+/g, "-");
+}
+
+export const categoryBlurb: Record<Category, string> = {
+  "Tax & Salary": "Salary tax, take-home pay, freelancer and property tax",
+  Business: "Online selling profit, Daraz fees, margins and markup",
+  Bills: "Estimate your monthly electricity bill",
+  Property: "Marla, kanal, square feet and gaz conversion",
+  "Personal Finance": "Zakat, discounts and monthly SIP investing",
+};
+
+export const quickLinks: { label: string; slug: ToolSlug }[] = [
+  { label: "Salary tax", slug: "salary-tax-calculator-pakistan" },
+  { label: "Net salary", slug: "net-salary-calculator-pakistan" },
+  { label: "Electricity bill", slug: "electricity-bill-calculator-pakistan" },
+  { label: "Marla to sq ft", slug: "marla-to-square-feet-calculator" },
+  { label: "Daraz profit", slug: "daraz-profit-calculator" },
+  { label: "COD profit", slug: "cod-profit-calculator" },
+  { label: "Zakat", slug: "zakat-calculator-pakistan" },
+];

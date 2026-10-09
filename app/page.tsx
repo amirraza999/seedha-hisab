@@ -10,9 +10,9 @@ import {
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { ToolCard } from "@/components/tool-card";
+import { ToolsByCategory } from "@/components/tools-by-category";
 import { HomeSearch } from "@/components/home-search";
-import { categories, tools } from "@/lib/tools";
+import { quickLinks } from "@/lib/tools";
 import { guides } from "@/lib/guides";
 import { coreKeywords, SITE_URL } from "@/lib/seo";
 
@@ -61,25 +61,36 @@ export default function Home() {
       <main>
         <section className="relative overflow-hidden border-b border-slate-200 bg-[#f6f9fc]">
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#087f5b] via-[#1ea97c] to-[#102a43]" />
-          <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[.88fr_1.12fr] lg:gap-14 lg:py-24">
+          <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:grid-cols-[1.1fr_.9fr] lg:gap-12">
             <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-extrabold text-emerald-800">
-                <BadgeCheck size={15} /> Transparent formulas. Visible sources.
-              </div>
-              <h1 className="mt-6 text-4xl font-black tracking-[-.04em] text-[#102a43] sm:text-5xl lg:text-6xl">
+              <h1 className="text-3xl font-black tracking-[-.04em] text-[#102a43] sm:text-4xl lg:text-5xl">
                 Pakistan’s smarter money calculators.
               </h1>
-              <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg lg:mx-0">
-                Calculate tax, salary, COD profit, bills and property
-                figures—then see exactly how the answer was worked out.
+              <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-slate-600 lg:mx-0">
+                Tax, salary, bills, property, Zakat and online-selling profit —
+                pick a calculator and get your answer in seconds.
               </p>
               <HomeSearch />
+              <div className="mt-4 flex flex-wrap justify-center gap-2 lg:justify-start">
+                <span className="self-center text-xs font-bold text-slate-500">
+                  Popular:
+                </span>
+                {quickLinks.map((q) => (
+                  <Link
+                    key={q.slug}
+                    href={`/tools/${q.slug}`}
+                    className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-[#102a43] hover:border-emerald-400 hover:text-[#087f5b]"
+                  >
+                    {q.label}
+                  </Link>
+                ))}
+              </div>
               <p className="mt-4 text-xs font-semibold text-slate-500">
-                Free to use · No registration · Your calculator inputs stay on
-                your device
+                <BadgeCheck size={14} className="mr-1 inline text-[#087f5b]" />
+                Free · No registration · Your inputs stay on your device
               </p>
             </div>
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-white bg-white shadow-[0_28px_70px_rgba(15,42,67,.16)] ring-1 ring-slate-200/70">
+            <div className="relative hidden overflow-hidden rounded-[1.75rem] border border-white bg-white shadow-[0_28px_70px_rgba(15,42,67,.16)] ring-1 ring-slate-200/70 lg:block">
               {/* Native images avoid a Vinext hydration mismatch while preserving intrinsic sizing. */}
               <img
                 src="/images/pakistan-money-calculators-hero.webp"
@@ -90,39 +101,18 @@ export default function Home() {
                 decoding="async"
                 className="h-auto w-full"
               />
-              <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/80 bg-white/90 px-4 py-3 text-left shadow-lg backdrop-blur-sm sm:inset-x-auto sm:bottom-5 sm:left-5 sm:max-w-xs">
-                <p className="text-xs font-extrabold uppercase tracking-[.12em] text-[#087f5b]">
-                  One clear toolkit
-                </p>
-                <p className="mt-1 text-sm font-bold leading-5 text-[#102a43]">
-                  Tax, salary, business, bills and property—without hidden
-                  formulas.
-                </p>
-              </div>
             </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20">
-          <div className="flex items-end justify-between gap-6">
-            <div>
-              <p className="eyebrow">Start here</p>
-              <h2 className="section-title">Popular calculators</h2>
-            </div>
-            <Link
-              href="/tools"
-              className="hidden items-center gap-2 text-sm font-bold text-[#087f5b] sm:flex"
-            >
-              View all tools <ArrowRight size={17} />
-            </Link>
-          </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {tools
-              .filter((t) => t.featured)
-              .map((t) => (
-                <ToolCard key={t.slug} tool={t} />
-              ))}
-          </div>
+        <section
+          id="tools"
+          className="mx-auto max-w-7xl scroll-mt-20 px-4 py-8 sm:px-6 sm:py-12"
+        >
+          <h2 className="mb-4 text-2xl font-black tracking-tight text-[#102a43]">
+            All calculators
+          </h2>
+          <ToolsByCategory />
         </section>
 
         <section className="border-y border-slate-200 bg-[#f6f9fc]">
@@ -316,31 +306,6 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-          <p className="eyebrow">Browse by need</p>
-          <h2 className="section-title">
-            One focused toolkit for real Pakistani decisions
-          </h2>
-          <div className="mt-8 space-y-12">
-            {categories.map((category) => (
-              <div key={category}>
-                <div className="mb-4 flex items-center gap-3">
-                  <h3 className="text-xl font-black text-[#102a43]">
-                    {category}
-                  </h3>
-                  <span className="h-px flex-1 bg-slate-200" />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {tools
-                    .filter((t) => t.category === category)
-                    .map((t) => (
-                      <ToolCard key={t.slug} tool={t} />
-                    ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
       <SiteFooter />
     </>

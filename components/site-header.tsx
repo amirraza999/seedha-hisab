@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Calculator } from "lucide-react";
 import { MobileNav } from "@/components/mobile-nav";
 import { SiteSearch } from "@/components/site-search";
+import { categories, categorySlug } from "@/lib/tools";
 
 export function SiteHeader() {
   return (
@@ -26,36 +27,15 @@ export function SiteHeader() {
           <Link href="/tools" className="hover:text-[#087f5b]">
             All Tools
           </Link>
-          <Link
-            href="/tools/salary-tax-calculator-pakistan"
-            className="hover:text-[#087f5b]"
-          >
-            Tax & Salary
-          </Link>
-          <Link
-            href="/tools/cod-profit-calculator"
-            className="hover:text-[#087f5b]"
-          >
-            Business
-          </Link>
-          <Link
-            href="/tools/electricity-bill-calculator-pakistan"
-            className="hover:text-[#087f5b]"
-          >
-            Bills
-          </Link>
-          <Link
-            href="/tools/marla-to-square-feet-calculator"
-            className="hover:text-[#087f5b]"
-          >
-            Property
-          </Link>
-          <Link
-            href="/tools/zakat-calculator-pakistan"
-            className="hover:text-[#087f5b]"
-          >
-            Personal Finance
-          </Link>
+          {categories.map((category) => (
+            <Link
+              key={category}
+              href={`/tools#${categorySlug(category)}`}
+              className="hover:text-[#087f5b]"
+            >
+              {category}
+            </Link>
+          ))}
           <Link href="/guides" className="font-extrabold text-[#087f5b]">
             Guides
           </Link>

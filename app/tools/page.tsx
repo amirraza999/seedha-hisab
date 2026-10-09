@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { ToolCard } from "@/components/tool-card";
+import { ToolsByCategory } from "@/components/tools-by-category";
 import { tools } from "@/lib/tools";
 import { coreKeywords, SITE_URL } from "@/lib/seo";
 
@@ -40,21 +40,15 @@ export default function ToolsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       <SiteHeader />
-      <main className="mx-auto min-h-[65vh] max-w-7xl px-4 py-14 sm:px-6">
-        <p className="eyebrow">All tools</p>
-        <h1 className="section-title">
-          Pakistan calculators for tax, salary, business, bills and property
+      <main className="mx-auto min-h-[65vh] max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+        <h1 className="text-3xl font-black tracking-[-.035em] text-[#102a43] sm:text-4xl">
+          All Pakistan calculators
         </h1>
-        <p className="mt-3 max-w-3xl leading-7 text-slate-600">
-          Calculate salary tax, take-home pay, freelancer withholding, COD
-          profit, electricity costs, land area, Zakat and discounts. Every tool
-          shows its formula, assumptions and relevant source.
+        <p className="mt-2 mb-6 max-w-3xl leading-7 text-slate-600">
+          Pick what you need — every tool shows its formula, assumptions and
+          source.
         </p>
-        <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {tools.map((tool) => (
-            <ToolCard key={tool.slug} tool={tool} />
-          ))}
-        </div>
+        <ToolsByCategory />
       </main>
       <SiteFooter />
     </>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Menu } from "lucide-react";
+import { categories, categorySlug } from "@/lib/tools";
 import {
   Sheet,
   SheetClose,
@@ -12,16 +13,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-const links = [
+const links: readonly (readonly [string, string])[] = [
   ["All Tools", "/tools"],
-  ["Tax & Salary", "/tools/salary-tax-calculator-pakistan"],
-  ["Business", "/tools/cod-profit-calculator"],
-  ["Bills", "/tools/electricity-bill-calculator-pakistan"],
-  ["Property", "/tools/marla-to-square-feet-calculator"],
-  ["Personal Finance", "/tools/zakat-calculator-pakistan"],
+  ...categories.map((c) => [c, `/tools#${categorySlug(c)}`] as const),
   ["Guides", "/guides"],
   ["Methodology", "/methodology"],
-] as const;
+];
 
 export function MobileNav() {
   return (
